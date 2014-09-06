@@ -12,6 +12,7 @@ cards.directive('ccCard', function () {
       
       $scope.edit = function () {
         elCard.addClass('edit');
+        elEdit.focus();
       };
 
       elEdit.on('focusout', function () {

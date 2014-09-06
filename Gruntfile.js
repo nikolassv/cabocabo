@@ -12,7 +12,7 @@ module.exports = function (grunt) {
       dist : {
         files : {
           'dist/styles.css': ['app/styles/reset.css', 'app/styles/main.css'],
-          'dist/lib.js' : ['lib/angular/angular.min.js'],
+          'dist/lib.js' : ['lib/jquery/dist/jquery.min.js', 'lib/angular/angular.min.js'],
           'dist/app.js' : [
             'app/scripts/modules/*',      // module definitions
             'app/scripts/modules/**/*',   // module assets
@@ -27,7 +27,7 @@ module.exports = function (grunt) {
       dist : {
         files : [
           {src: ['app/index.html'], dest: 'dist/index.html'},
-          {src: ['app/views/**'], dest: 'dist/views'}
+          {expand: true, cwd: 'app/views/', src: ['*'], dest: 'dist/views/'}
         ]
       }
     }
@@ -39,6 +39,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
 
   grunt.registerTask('default', [
+    'clean',
     'jshint',
     'concat', 
     'copy'
