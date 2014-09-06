@@ -49,6 +49,27 @@ body {
   margin-bottom: 5px;
 }
 
+.card.edit .card-body {
+  display: none;
+}
+
+.card-editor {
+  display: none;
+}
+
+.edit .card-editor {
+  display: block;
+}
+
+.card-body,
+.card-editor {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  background-color: inherit;
+  line-height: inherit;
+}
+
 
 
 

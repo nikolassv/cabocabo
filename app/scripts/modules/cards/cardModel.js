@@ -1,7 +1,7 @@
 cards.factory('CardModel', function () {
   function CardModel (content) {
     this.content = content;
-    this.creationDate = new Date();
+    this.cdate = new Date();
   }
 
   return CardModel;
