@@ -1,6 +1,20 @@
 cards.service('CardsService', [
-  'CardModel', 
-  function (CardModel) {
+  '$window', 'CardModel', 
+  function ($window, CardModel) {
+    var cards = [],
+        hasLocalStorage = typeof $window.localStorage.setItem == 'function',
+        saveToLocalStorage = function () {
+          if (hasLocalStorage) {
+            $window.localStorage.setItem('cabocabo-cards', JSON.stringify(cards));
+          }
+        };
+
+    if (hasLocalStorage) {
+      var savedCards = JSON.parse($window.localStorage.getItem('cabocabo-cards'));
+      if (angular.isArray(savedCards)) {
+        cards = savedCards;
+      }
+    }
 
     /**
      * return all cards for this user
@@ -8,17 +22,19 @@ cards.service('CardsService', [
      * @return {array.<CardModel>}
      */
     this.getAll = function () {
-      var exampleTexts = [
-        'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea #takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.'
-      ],
-      
-      newCards = [];
+      return cards;
+    };
 
-      angular.forEach(exampleTexts, function (text) {
-        newCards.push(new CardModel(text));
-      });
-
-      return newCards;
+    /**
+     * add a new card
+     *
+     * @return {CardModel}
+     */
+    this.add = function () {
+      var newCard = new CardModel(this);
+      cards.push(newCard);
+      saveToLocalStorage();
+      return newCard;
     };
   }
 ]);

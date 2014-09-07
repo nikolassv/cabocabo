@@ -87,10 +87,26 @@ body {
   font-size: 14px;
 }
 
+.card-new {
+  font-size: 18px;
+  padding: 30px;
+  text-align: center;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.card-new:hover {
+  opacity: 0.9;
+}
+
 .card-meta {
   font-size: 10px;
   color: #666666;
   margin-bottom: 5px;
+}
+
+.card-body {
+  padding: 3px;
 }
 
 .card.edit .card-body {
@@ -112,6 +128,12 @@ body {
   font-size: 14px;
   background-color: inherit;
   line-height: inherit;
+  min-height: 50px;
+  cursor: pointer;
+}
+
+.card-editor {
+  background-color: #ffffff;
 }
 
 
