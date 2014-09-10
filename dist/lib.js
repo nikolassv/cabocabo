@@ -218,3 +218,110 @@ s=k.ngOptions,x=!1,v,C=u(X.createElement("option")),y=u(X.createElement("optgrou
 l=h.data("$selectController")||h.parent().data("$selectController");l&&l.databound?d.prop("selected",!1):l=c;f?a.$watch(f,function(a,c){e.$set("value",a);a!==c&&l.removeOption(c);l.addOption(a)}):l.addOption(e.value);d.on("$destroy",function(){l.removeOption(e.value)})}}}}],hd=$({restrict:"E",terminal:!0});Q.angular.bootstrap?console.log("WARNING: Tried to load angular more than once."):((Da=Q.jQuery)&&Da.fn.on?(u=Da,B(Da.fn,{scope:La.scope,isolateScope:La.isolateScope,controller:La.controller,injector:La.injector,
 inheritedData:La.inheritedData}),Gb("remove",!0,!0,!1),Gb("empty",!1,!1,!1),Gb("html",!1,!1,!0)):u=S,Ua.element=u,$c(Ua),u(X).ready(function(){Xc(X,fc)}))})(window,document);!window.angular.$$csp()&&window.angular.element(document).find("head").prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide{display:none !important;}ng\\:form{display:block;}.ng-animate-block-transitions{transition:0s all!important;-webkit-transition:0s all!important;}.ng-hide-add-active,.ng-hide-remove{display:block!important;}</style>');
 //# sourceMappingURL=angular.min.js.map
+
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2014 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+/**
+ * module containing a directive to automaticly resize a textarea to always fit the height of its content
+ *
+ * the directive textarea-fit can be used on a textarea element to always set its 
+ * height to the height of its content. This prevents the display of a vertical
+ * scrollbar inside the textarea.
+ *
+ * note that the directive `ng-trim=0` should also be set on that textarea to 
+ * prevent problems with angulars default trimming.
+ *
+ * this directive also requires you to load jQuery before angular
+ *
+ * @author Nikolas Schmidt-Voigt <nikolas.schmidt-voigt@posteo.de>
+ * @module textarea-fit
+ */
+angular
+  .module('textarea-fit',[])
+  .directive('textareaFit', [
+    '$log',
+    function ($log) {
+      var copyCssStyles = function (elSrc, elDest) {
+            var stylesToCopy = [
+                  'width',
+                  'font-family',
+                  'font-size',
+                  'line-height',
+                  'min-height',
+                  'padding'
+                ],
+                destStyles = {};
+            
+            angular.forEach(stylesToCopy, function (style) {
+              destStyles[style] = elSrc.css(style); 
+            });
+
+            elDest.css(destStyles); 
+          };
+
+      return {
+        restrict: 'A',
+        link : function ($scope, $element) {
+          if (!angular.isFunction($element.height)) {
+            $log.error('textareaFit directive only works when jQuery is loaded');
+          } else if (!$element.is('textarea')) {
+            $log.info('textareaFit directive only works for elements of type "textarea"');
+          } else {
+            var elClone = angular.element('<div>'),
+                setEqualHeight = function () {
+                  var curText = $element.val();
+                  if (/\n$/.test(curText)) {
+                    curText += ' ';
+                  }
+                  copyCssStyles($element, elClone);
+                  elClone.text(curText);
+                  $element.height(elClone.height());
+                };
+
+            elClone
+              .hide()
+              .css({
+                'white-space': 'pre-wrap',
+                'word-wrap' : 'break-word'
+              });
+            $element.parent().append(elClone);
+            $element.css('overflow', 'hidden');
+
+            $scope.$watch(function () {
+              return $element.val();
+            }, setEqualHeight);
+
+            $scope.$watch(function () {
+              return $element.width();
+            }, setEqualHeight);
+
+            $scope.$on('destroy', function () {
+              elClone.remove();
+              elClone = null;
+            });
+          }
+        }
+      };
+    }]
+  );

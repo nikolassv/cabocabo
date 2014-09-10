@@ -1,4 +1,4 @@
 var cabocabo = angular.module('cabocabo', [
   'cards',
-  'ui'
+  'textarea-fit'
 ]);

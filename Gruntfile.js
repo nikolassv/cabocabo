@@ -12,7 +12,11 @@ module.exports = function (grunt) {
       dist : {
         files : {
           'dist/styles.css': ['app/styles/reset.css', 'app/styles/main.css'],
-          'dist/lib.js' : ['lib/jquery/dist/jquery.min.js', 'lib/angular/angular.min.js'],
+          'dist/lib.js' : [
+            'lib/jquery/dist/jquery.min.js',
+            'lib/angular/angular.min.js',
+            'lib/angular-textarea-fit/angular-textarea-fit.js'
+          ],
           'dist/app.js' : [
             'app/scripts/modules/*',      // module definitions
             'app/scripts/modules/**/*',   // module assets

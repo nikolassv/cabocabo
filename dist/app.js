@@ -1,9 +1,6 @@
 
 var cards = angular.module('cards', []);
 
-
-var ui = angular.module('ui', []);
-
 cards.directive('ccCard', function () {
   return {
     restrict : 'E',
@@ -29,7 +26,19 @@ cards.directive('ccCard', function () {
 });
 
 cards.factory('CardModel', function () {
-  function CardModel (content) {
+  function CardModel () {
+    var listenerList =[];
+
+    this.registerListener = function (listener) {
+      listenerList.push(listener);
+    };
+
+    this.notify = function () {
+      angular.forEach(listenerList, function (listener) {
+        listener(this);
+      }, this);
+    };
+
     this.content = content;
     this.cdate = new Date();
   }
@@ -70,7 +79,7 @@ cards.service('CardsService', [
      * @return {CardModel}
      */
     this.add = function () {
-      var newCard = new CardModel();
+      var newCard = new CardModel(this);
       cards.push(newCard);
       saveToLocalStorage();
       return newCard;
@@ -78,77 +87,9 @@ cards.service('CardsService', [
   }
 ]);
 
-/**
- * directive to resize a textareo to always fit the height of its content
- */
-ui.directive('textAreaVerticalFit', [
-  function () {
-    var 
-        /**
-         * copy important css styles from one element to another
-         *
-         * @param {jQuery} elSrc
-         * @param {jQuery} elDest
-         */
-        copyCssStyles = function (elSrc, elDest) {
-          var stylesToCopy = [
-                'width',
-                'font-family',
-                'font-size',
-                'line-height',
-                'min-height',
-                'padding'
-              ],
-              destStyles = {};
-          
-          angular.forEach(stylesToCopy, function (style) {
-            destStyles[style] = elSrc.css(style); 
-          });
-
-          elDest.css(destStyles); 
-        };
-
-    return {
-      restrict: 'A',
-      link : function ($scope, $element) {
-        if ($element.is('textarea')) {
-          var elClone = angular.element('<div>'),
-              setEqualHeight = function () {
-                var curText = $element.val();
-                if (/\n$/.test(curText)) {
-                  curText += ' ';
-                }
-                copyCssStyles($element, elClone);
-                elClone.text(curText);
-                $element.height(elClone.height());
-              };
-
-          elClone
-            .hide()
-            .css({
-              'white-space': 'pre-wrap',
-              'word-wrap' : 'break-word'
-            })
-            .appendTo($element.parent());
-
-          $element.css('overflow', 'hidden');
-
-          $scope.$watch(function () {
-            return $element.val();
-          }, setEqualHeight);
-
-          $scope.$watch(function () {
-            return $element.width();
-          }, setEqualHeight);
-        }
-      }
-    };
-  }]
-);
-
 var cabocabo = angular.module('cabocabo', [
   'cards',
-  'ui'
+  'textarea-fit'
 ]);
 
 cabocabo.controller('MainCtrl', [
