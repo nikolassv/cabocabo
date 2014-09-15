@@ -1,20 +1,37 @@
 cards.factory('CardModel', function () {
-  function CardModel () {
+  function CardModel (manager) {
     var listenerList =[];
 
-    this.registerListener = function (listener) {
-      listenerList.push(listener);
-    };
+    /**
+     * the cards content
+     * @type {string}
+     */
+    this.content = '';
 
-    this.notify = function () {
-      angular.forEach(listenerList, function (listener) {
-        listener(this);
-      }, this);
-    };
-
-    this.content = content;
+    /**
+     * creation date
+     * @type {Date}
+     */
     this.cdate = new Date();
   }
+
+  /**
+   * set card data from a raw object
+   *
+   * @param {Object}
+   * @return {CardModel}
+   */
+  CardModel.prototype.setData = function (obj) {
+    if (angular.isString(obj.content)) {
+      this.content = obj.content;
+    }
+
+    if (angular.isDate(obj.cdate)) {
+      this.cdata = obj.cdate;
+    }
+
+    return this;
+  };
 
   return CardModel;
 });

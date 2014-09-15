@@ -15,7 +15,8 @@ module.exports = function (grunt) {
           'dist/lib.js' : [
             'lib/jquery/dist/jquery.min.js',
             'lib/angular/angular.min.js',
-            'lib/angular-textarea-fit/angular-textarea-fit.js'
+            'lib/angular-textarea-fit/angular-textarea-fit.js',
+            'lib/angular-local-storage/angular-local-storage.min.js'
           ],
           'dist/app.js' : [
             'app/scripts/modules/*',      // module definitions
