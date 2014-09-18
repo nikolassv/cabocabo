@@ -2,7 +2,7 @@ cards.service('CardsService', [
   '$window', '$rootScope', 'CardModel', 'localStorageService',
   function ($window, $rootScope, CardModel, LocalStorageService) {
     var
-        LS_ALL_CARDS = 'cards.allCards',
+        LS_ALL_CARDS = 'cards.allCards', // name in localstorage
 
         /**
          * an array with all the cards
@@ -14,7 +14,10 @@ cards.service('CardsService', [
          * an array with raw card data from the local storage
          * @type {Array.<Object>}
          */
-        tmpRawCards = LocalStorageService.get(LS_ALL_CARDS);
+        tmpRawCards = LocalStorageService.get(LS_ALL_CARDS),
+
+        // reference to this service
+        thisService = this;
 
     var saveToLocalStorage = function () {
       LocalStorageService.set(LS_ALL_CARDS, cards);
@@ -35,18 +38,22 @@ cards.service('CardsService', [
      * @return {CardModel}
      */
     this.add = function () {
-      var newCard = new CardModel(this);
+      var newCard = new CardModel(thisService);
       cards.push(newCard);
       saveToLocalStorage();
       return newCard;
     };
 
     /**
-     * register a change in one card
+     * save a card to the localstorage
+     *
+     * (in lack of saving method for individual card, we will save all the cards
+     *   at once)
+     *
      * @param {CardModel}
-     * @return {CardsService}
+     * @return this
      */
-    this.notify = function (card) {
+    this.save = function (card) {
       saveToLocalStorage();
       return this;
     };
@@ -60,7 +67,7 @@ cards.service('CardsService', [
     this.convertArray = function (arr) {
       var newCardArray = [];
       angular.forEach(arr, function (cardData) {
-        var newCard = new CardModel(this);
+        var newCard = new CardModel(thisService);
         newCard.setData(cardData);
         newCardArray.push(newCard);
       });

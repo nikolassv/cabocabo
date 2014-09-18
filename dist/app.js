@@ -1,7 +1,8 @@
 
 var cards = angular.module('cards', [
   'textarea-fit',
-  'LocalStorageModule'
+  'LocalStorageModule',
+  'angular-nsv-stringformat'
 ]);
 
 cards.directive('ccCard', function () {
@@ -23,6 +24,7 @@ cards.directive('ccCard', function () {
 
       elEdit.on('focusout', function () {
         elCard.removeClass('edit');
+        $scope.card.save();
       });
     }
   };
@@ -43,25 +45,36 @@ cards.factory('CardModel', function () {
      * @type {Date}
      */
     this.cdate = new Date();
+
+
+    /**
+     * set card data from a raw object
+     *
+     * @param {Object}
+     * @return {CardModel}
+     */
+    this.setData = function (obj) {
+      if (angular.isString(obj.content)) {
+        this.content = obj.content;
+      }
+
+      if (angular.isDate(obj.cdate)) {
+        this.cdata = obj.cdate;
+      }
+
+      return this;
+    };
+
+    /**
+     * save this card
+     *
+     * @return {CardModel}
+     */
+    this.save = function () {
+      manager.save(this);
+      return this;
+    };
   }
-
-  /**
-   * set card data from a raw object
-   *
-   * @param {Object}
-   * @return {CardModel}
-   */
-  CardModel.prototype.setData = function (obj) {
-    if (angular.isString(obj.content)) {
-      this.content = obj.content;
-    }
-
-    if (angular.isDate(obj.cdate)) {
-      this.cdata = obj.cdate;
-    }
-
-    return this;
-  };
 
   return CardModel;
 });
@@ -70,7 +83,7 @@ cards.service('CardsService', [
   '$window', '$rootScope', 'CardModel', 'localStorageService',
   function ($window, $rootScope, CardModel, LocalStorageService) {
     var
-        LS_ALL_CARDS = 'cards.allCards',
+        LS_ALL_CARDS = 'cards.allCards', // name in localstorage
 
         /**
          * an array with all the cards
@@ -82,7 +95,10 @@ cards.service('CardsService', [
          * an array with raw card data from the local storage
          * @type {Array.<Object>}
          */
-        tmpRawCards = LocalStorageService.get(LS_ALL_CARDS);
+        tmpRawCards = LocalStorageService.get(LS_ALL_CARDS),
+
+        // reference to this service
+        thisService = this;
 
     var saveToLocalStorage = function () {
       LocalStorageService.set(LS_ALL_CARDS, cards);
@@ -103,18 +119,22 @@ cards.service('CardsService', [
      * @return {CardModel}
      */
     this.add = function () {
-      var newCard = new CardModel(this);
+      var newCard = new CardModel(thisService);
       cards.push(newCard);
       saveToLocalStorage();
       return newCard;
     };
 
     /**
-     * register a change in one card
+     * save a card to the localstorage
+     *
+     * (in lack of saving method for individual card, we will save all the cards
+     *   at once)
+     *
      * @param {CardModel}
-     * @return {CardsService}
+     * @return this
      */
-    this.notify = function (card) {
+    this.save = function (card) {
       saveToLocalStorage();
       return this;
     };
@@ -128,7 +148,7 @@ cards.service('CardsService', [
     this.convertArray = function (arr) {
       var newCardArray = [];
       angular.forEach(arr, function (cardData) {
-        var newCard = new CardModel(this);
+        var newCard = new CardModel(thisService);
         newCard.setData(cardData);
         newCardArray.push(newCard);
       });

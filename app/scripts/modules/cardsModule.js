@@ -1,4 +1,5 @@
 var cards = angular.module('cards', [
   'textarea-fit',
-  'LocalStorageModule'
+  'LocalStorageModule',
+  'angular-nsv-stringformat'
 ]);

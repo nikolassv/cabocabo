@@ -17,6 +17,7 @@ cards.directive('ccCard', function () {
 
       elEdit.on('focusout', function () {
         elCard.removeClass('edit');
+        $scope.card.save();
       });
     }
   };
