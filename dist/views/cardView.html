@@ -1,9 +1,6 @@
-<div class="card">
   <div class="card-meta">{{card.cdate | date}}</div>
   <div class="card-body" ng-click="edit()"
     ng-bind-html="card.content | sanitizeTags | paragraphs:{'class':'card-body-text'}
       | newlines | linkUrls | trustAsHtml"></div>
   <textarea class="card-editor" ng-model="card.content" ng-trim="0"
     textarea-fit></textarea>
-</div>
-

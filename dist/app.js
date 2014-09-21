@@ -1,11 +1,15 @@
-
-var cards = angular.module('cards', [
-  'textarea-fit',
-  'LocalStorageModule',
-  'angular-nsv-stringformat'
+angular.module('search', [
+  'angular-nsv-tagmanager'
 ]);
 
-cards.directive('ccCard', function () {
+angular.module('cards', [
+  'textarea-fit',
+  'LocalStorageModule',
+  'angular-nsv-stringformat',
+  'search'
+]);
+
+angular.module('cards').directive('ccCard', function () {
   return {
     restrict : 'E',
     scope : {
@@ -30,7 +34,7 @@ cards.directive('ccCard', function () {
   };
 });
 
-cards.factory('CardModel', function () {
+angular.module('cards').factory('CardModel', function () {
   function CardModel (manager) {
     var listenerList =[];
 
@@ -79,7 +83,7 @@ cards.factory('CardModel', function () {
   return CardModel;
 });
 
-cards.service('CardsService', [
+angular.module('cards').service('CardsService', [
   '$window', '$rootScope', 'CardModel', 'localStorageService',
   function ($window, $rootScope, CardModel, LocalStorageService) {
     var
@@ -165,11 +169,33 @@ cards.service('CardsService', [
   }
 ]);
 
-var cabocabo = angular.module('cabocabo', [
+angular.module('search').service('search.SearchService', [
+ 'angular-nsv-tagmanager.TagIndex', 'angular-nsv-tagmanager.Set',
+ function (Tagmanager, Set) {
+  var tagRegEx = /#[a-z]+/gi;
+
+  /**
+   * extract tags from a text
+   *
+   * @param {string} text
+   * @return {Set}
+   */
+  this.extractTagsFromText = function (text) {
+    var rawTags = text.match(tagRegEx),
+        tags = new Set();
+    angular.forEach(rawTags, function(rT) {
+      tags.insert(rT.slice(1));
+    });
+    return tags;
+  };
+ }
+]);
+
+angular.module('cabocabo', [
   'cards'
 ]);
 
-cabocabo.controller('MainCtrl', [
+angular.module('cabocabo').controller('MainCtrl', [
   '$scope', 'CardsService',
   function ($scope, CardsService) {
     $scope.cardList = CardsService.getAll();

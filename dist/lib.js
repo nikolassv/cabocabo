@@ -351,56 +351,60 @@ angular
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
- angular.module('angular-nsv-stringformat',[])
-	.filter('paragraphs', function paragraphsFilterProvider () {
-		return function paragraphsFilter ($input) {
-			return angular.isString($input) ? '<p>'+ $input.replace(/\n\n+/gm , '</p><p>') + '</p>': '';
-		};
-	})
-	.filter('newlines', function newlinesFilterProvider () {
-		return function newlinesFilter ($input) {
-			return angular.isString($input) ? $input.replace(/\n/gm, '<br/>') : '';
-		};
-	})
-	.filter('stripTags', function stripTagsFilterProvider () {
-		return function stripTagsFilter ($input) {
-			return angular.isString($input) ? $input.replace(/<[^>]+/gm, '') : '';
-		};
-	})
-	.filter('sanitizeTags', function sanitizeTagsFilterProvider () {
-		return function sanitizeTagsFilter ($input) {
-			return angular.isString($input) ? $input.replace(/</gm, '&lt;').replace(/>/gm, '&gt;') : '';
-		}
-	})
-	.filter('linkUrls', function linkUrlsFilterProvider () {
-		var defaultProtocols = [
-			'http',
-			'https',
-			'ftp',
-			'file',
-		];
-		
-		return function linkUrlsFilter ($input, protocols, attrs) {
-			var attributesString = '';
-			if (angular.isObject(attrs)) {
-				for (var prop in attrs) {
-					if (attrs.hasOwnProperty(prop)) {
-						attributesString += ' '+prop+'="'+attrs[prop]+'"';
-					}
-				}
-			}
-			if (!angular.isArray(protocols)) {
-				protocols = defaultProtocols;
-			}
-			var urlRegexp = new RegExp('('+protocols.join('|')+')://\\S+', 'gi');
-			return angular.isString($input) ? $input.replace(urlRegexp, '<a href="$&"' + attributesString + '>$&</a>') : '';
-		};
-	})
-	.filter('trustAsHtml', ['$sce', function trustAsHtmlFilterProvider ($sce) {
-		return function trustAsHtmlFilter ($input) {
-			return $sce.trustAsHtml($input);
-		}
-	}]);
+(function () {
+  function createAttributesString (attrs) {
+    var attributesString = '';
+    if (angular.isObject(attrs)) {
+      for (var prop in attrs) {
+        if (attrs.hasOwnProperty(prop)) {
+          attributesString += ' '+prop+'="'+attrs[prop]+'"';
+        }
+      }
+    }
+    return attributesString;
+  }
+
+  angular.module('angular-nsv-stringformat',[])
+    .filter('paragraphs', function paragraphsFilterProvider () {
+      return function paragraphsFilter ($input, attrs) {
+        var pTag = '<p'+createAttributesString(attrs)+'>';
+        return angular.isString($input) ? 
+                pTag+ $input.replace(/\n\n+/gm , '</p>'+pTag)+'</p>'
+                : '';
+      };
+    })
+    .filter('newlines', function newlinesFilterProvider () {
+      return function newlinesFilter ($input) {
+        return angular.isString($input) ? $input.replace(/\n/gm, '<br/>') : '';
+      };
+    })
+    .filter('stripTags', function stripTagsFilterProvider () {
+      return function stripTagsFilter ($input) {
+        return angular.isString($input) ? $input.replace(/<[^>]+/gm, '') : '';
+      };
+    })
+    .filter('sanitizeTags', function sanitizeTagsFilterProvider () {
+      return function sanitizeTagsFilter ($input) {
+        return angular.isString($input) ? $input.replace(/</gm, '&lt;').replace(/>/gm, '&gt;') : '';
+      }
+    })
+    .filter('linkUrls', function linkUrlsFilterProvider () {
+      var urlRegexp = new RegExp(
+          '(https?|ftp|file)://' // the protocols
+          + '[A-Za-z0-9\\-_.~;:@=+$,/?%#[\\]!*\'()]+', // allowed chars in a url
+        'gi');
+      
+      return function linkUrlsFilter ($input, attrs) {
+        var attributesString = createAttributesString(attrs);
+        return angular.isString($input) ? $input.replace(urlRegexp, '<a href="$&"' + attributesString + '>$&</a>') : '';
+      };
+    })
+    .filter('trustAsHtml', ['$sce', function trustAsHtmlFilterProvider ($sce) {
+      return function trustAsHtmlFilter ($input) {
+        return $sce.trustAsHtml($input);
+      }
+    }]);
+}());
 
 angular.module('angular-nsv-tagmanager', [])
   .factory('angular-nsv-tagmanager.Set', function () {
@@ -512,7 +516,8 @@ angular.module('angular-nsv-tagmanager', [])
        * other elements (its properties).
        */
       function Index () {
-        var index = {};
+        var index = {}
+            that = this;
         
         /**
          * applies a method on many elements
@@ -529,14 +534,14 @@ angular.module('angular-nsv-tagmanager', [])
           if (arr instanceof Set) {
             arr = arr.toArray();
           }
-          if (angular.isArray(arr)) {
+          if (!angular.isArray(arr)) {
             throw new TypeError('expected argument to be of type Array or Set');
           }
           for (var i=0;i<arr.length;i++) {
             if (reversed) {
-              this[fnName](a[i], el);
+              that[fnName](arr[i], el);
             } else {
-              this[fnName](el, a[i]);
+              that[fnName](el, arr[i]);
             }
           }	
         }
@@ -545,7 +550,7 @@ angular.module('angular-nsv-tagmanager', [])
          * return all the properties of a given element
          */
         this.get = function (r) {
-          r = ''+r1;
+          r = ''+r;
           return index.hasOwnProperty(r) ? index[r] : new Set();
         }
 
@@ -558,7 +563,7 @@ angular.module('angular-nsv-tagmanager', [])
             index[r1] = new Set();
           }
           index[r1].insert(r2);
-          return index;
+          return this;
         }
 
         /**
@@ -569,7 +574,7 @@ angular.module('angular-nsv-tagmanager', [])
           if (index.hasOwnProperty(r1)) {
             index[r1].remove(r2);
           }
-          return index;
+          return this;
         }
 
         /**
@@ -634,6 +639,7 @@ angular.module('angular-nsv-tagmanager', [])
               throw new TypeError('expected argument to be of type Set or Array');
             }
             if (add) {
+              console.log(e,s);
               indexes[a].addMany(e, s);
               indexes[b].addToMany(s, e);
             } else {
@@ -693,7 +699,7 @@ angular.module('angular-nsv-tagmanager', [])
          * @return {Set}
          */
         this.getAToB = function (a) {
-          return index[0].get(a);
+          return indexes[0].get(a);
         }
 
         /**
@@ -703,7 +709,7 @@ angular.module('angular-nsv-tagmanager', [])
          * @return {Set}
          */	
         this.getBToA = function (b) {
-          return index[1].get(b);
+          return indexes[1].get(b);
         }
       }
 
@@ -732,6 +738,7 @@ angular.module('angular-nsv-tagmanager', [])
          */
         this.setTagsForItem = function setTagsForItem (itemId, tags) {
           tagIndex.setAToB(itemId, tags);
+          return this;
         }
         
         /**
@@ -741,7 +748,7 @@ angular.module('angular-nsv-tagmanager', [])
          * @return {Set.<string>}
          */
         this.getTagsForItem = function getTagsForItem (itemId) {
-          tagIndex.getAToB(itemId);
+          return tagIndex.getAToB(itemId);
         }
         
         /**
@@ -751,7 +758,7 @@ angular.module('angular-nsv-tagmanager', [])
          * @return {Set.<string>}
          */
         this.getItemsForTag = function getItemsForTag (tag) {
-          tagIndex.getBToA(tag);
+          return tagIndex.getBToA(tag);
         }
       }
 

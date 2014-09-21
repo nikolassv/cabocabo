@@ -21,10 +21,19 @@ module.exports = function (grunt) {
             'lib/angular-nsv-tagmanager/tagmanager.js'
           ],
           'dist/app.js' : [
-            'app/scripts/modules/*',      // module definitions
-            'app/scripts/modules/**/*',   // module assets
+            /**
+             * module definitions
+             *
+             * to solve dependencies between modules correctly their order is
+             * given explicitly
+             */
+            'app/scripts/modules/searchModule.js',
+            'app/scripts/modules/cardsModule.js',
+            
+            'app/scripts/modules/**/*.js',   // module assets
             'app/scripts/main.js',        // application module definition
-            'app/scripts/controller/**/*' // controller
+            'app/scripts/controller/**/*.js', // controller
+            '!app/scripts/**/tests/*.js' // do not include tests
           ]
         }
       }

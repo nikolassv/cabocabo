@@ -1,4 +1,4 @@
-cards.factory('CardModel', function () {
+angular.module('cards').factory('CardModel', function () {
   function CardModel (manager) {
     var listenerList =[];
 

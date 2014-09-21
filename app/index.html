@@ -13,10 +13,10 @@
 		<input type="text" class="commandbar-input"/>
 	</div>
   <div id="desk">
-    <cc-card ng-repeat="card in cardList" cc-card-model="card"></cc-card>
     <div class="card card-new" ng-click="addCard()">
       Neue Karte
     </div>
+    <cc-card ng-repeat="card in cardList" cc-card-model="card" class="card"></cc-card>
   </div>
 </body>
 </html>

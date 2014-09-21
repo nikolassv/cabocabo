@@ -32,12 +32,11 @@ body {
 }
 
 .card {
-  float: left;
-  width: 30%;
-  max-width: 350px;
-  min-width: 150px;
+  display:block;
+  width: 95%;
+  max-width: 450px;
   padding: 20px;
-  margin: 15px;
+  margin: 15px auto;
   background-color: #fafafa;
   border-radius: 4px;
   box-shadow: 2px 2px 6px #ccc;

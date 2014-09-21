@@ -1,4 +1,4 @@
-cards.directive('ccCard', function () {
+angular.module('cards').directive('ccCard', function () {
   return {
     restrict : 'E',
     scope : {

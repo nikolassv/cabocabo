@@ -1,4 +1,4 @@
-cards.service('CardsService', [
+angular.module('cards').service('CardsService', [
   '$window', '$rootScope', 'CardModel', 'localStorageService',
   function ($window, $rootScope, CardModel, LocalStorageService) {
     var

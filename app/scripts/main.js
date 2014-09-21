@@ -1,3 +1,3 @@
-var cabocabo = angular.module('cabocabo', [
+angular.module('cabocabo', [
   'cards'
 ]);
