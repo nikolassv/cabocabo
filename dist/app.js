@@ -18,17 +18,17 @@ angular.module('cards').directive('ccCard', function () {
     templateUrl : 'views/cardView.html',
     transclude : true,
     link : function ($scope, $element) {
-      var elCard = $element.find('.card'),
-          elEdit = elCard.find('.card-editor');
+      var elEdit = $element.find('.card-editor');
       
       $scope.edit = function () {
-        elCard.addClass('edit');
+        $element.addClass('edit');
         elEdit.focus();
       };
 
       elEdit.on('focusout', function () {
-        elCard.removeClass('edit');
-        $scope.card.save();
+        $element.removeClass('edit');
+        $scope.card.setModificationDate();
+        $scope.$apply();
       });
     }
   };
@@ -50,6 +50,11 @@ angular.module('cards').factory('CardModel', function () {
      */
     this.cdate = new Date();
 
+    /**
+     * modification date
+     * @type {Date}
+     */
+     this.mdate = new Date();
 
     /**
      * set card data from a raw object
@@ -62,8 +67,12 @@ angular.module('cards').factory('CardModel', function () {
         this.content = obj.content;
       }
 
-      if (angular.isDate(obj.cdate)) {
-        this.cdata = obj.cdate;
+      if (angular.isString(obj.cdate)) {
+        this.cdate = new Date(obj.cdate);
+      }
+
+      if (angular.isString(obj.mdate)) {
+        this.mdate = new Date(obj.mdate);
       }
 
       return this;
@@ -76,6 +85,24 @@ angular.module('cards').factory('CardModel', function () {
      */
     this.save = function () {
       manager.save(this);
+      return this;
+    };
+
+    /**
+     * sets the modification date for a card
+     *
+     * if the parameter is a date it will be set as the new modification date.
+     * otherwise the current date will be the modification date.
+     *
+     * @param {Date?}
+     * @return {CardModel}
+     */
+    this.setModificationDate = function (mdate) {
+      if (angular.isDate(mdate)) {
+        this.mdate = mdate;
+      } else {
+        this.mdate = new Date();
+      }
       return this;
     };
   }
@@ -118,14 +145,15 @@ angular.module('cards').service('CardsService', [
     };
 
     /**
-     * add a new card
+     * add a card
      *
      * @return {CardModel}
      */
-    this.add = function () {
-      var newCard = new CardModel(thisService);
+    this.add = function (card) {
+      var newCard = (card instanceof CardModel) ?
+                      card :
+                      new CardModel(thisService);
       cards.push(newCard);
-      saveToLocalStorage();
       return newCard;
     };
 
@@ -169,10 +197,65 @@ angular.module('cards').service('CardsService', [
   }
 ]);
 
+angular.module('search').directive('linkableTags', [
+  '$filter', '$parse', 'search.TagService',
+  function ($filter, $parse, TagService) {
+    var tagFilter = $filter('tags');
+    return {
+      link : function ($scope, $element, $attr) {
+        $element.on('click', function (evt) {
+          var $target = angular.element(evt.target);
+          if ($target.is('[data-tag]')) {
+            evt.stopPropagation();
+            $parse($attr.onTagClick)($scope.$parent)($target.data('tag'));
+          }
+        });
+      }
+    };
+  }
+]);
+
 angular.module('search').service('search.SearchService', [
- 'angular-nsv-tagmanager.TagIndex', 'angular-nsv-tagmanager.Set',
- function (Tagmanager, Set) {
-  var tagRegEx = /#[a-z]+/gi;
+ 'angular-nsv-tagmanager.TagIndex', 'angular-nsv-tagmanager.Set', 'search.TagService',
+ function (Tagmanager, Set, TagService) {
+  /**
+   * the index for all the texts
+   * @type {angular-nsv-tagmanager.TagIndex}
+   */
+  var tagIndex = new Tagmanager();
+
+  /**
+   * save the tags for a given text
+   *
+   * @param {number}
+   * @param {string}
+   * @return {SearchService}
+   */
+  this.indexText = function (id, text) {
+    var tags = TagService.extractTagsFromText(text);
+    tagIndex.setTagsForItem(id, tags); 
+    return this;
+  };
+
+  /**
+   * get the ids for a given item from the index
+   *
+   * @param {string}
+   * @return {Array.<number>}
+   */
+  this.getIdsForTag = function (tag) {
+    return tagIndex.getItemsForTag(tag).toArray();
+  };
+ }
+]);
+
+angular.module('search').service('search.TagService', function () {
+
+  /**
+   * regex to recognize tags in a text
+   * @type {RegExp}
+   */
+  this.tagRegEx = /#[a-z]+/gi;
 
   /**
    * extract tags from a text
@@ -188,7 +271,15 @@ angular.module('search').service('search.SearchService', [
     });
     return tags;
   };
- }
+});
+
+angular.module('search').filter('tags', [
+  'search.TagService',
+  function (TagService) {
+    return function ($input) {
+      return $input.replace(TagService.tagRegEx, '<span class="tag" data-tag="$&">$&</a>'); 
+    };
+  }
 ]);
 
 angular.module('cabocabo', [
@@ -196,10 +287,49 @@ angular.module('cabocabo', [
 ]);
 
 angular.module('cabocabo').controller('MainCtrl', [
-  '$scope', 'CardsService',
-  function ($scope, CardsService) {
-    $scope.cardList = CardsService.getAll();
+  '$log', '$scope', 'CardsService',
+  function ($log, $scope, CardsService) {
+    /**
+     * deregistration functions
+     * @type {Array.<function>}
+     */
+    var deregistrationFns = [];
 
-    $scope.addCard = CardsService.add;
+    /**
+     * watch a card by its modification date and save derigstration functions
+     * @param {CardModel}
+     */
+    var watchCard = function (card) {
+      deregistrationFns.push($scope.$watch(function () {
+        return angular.isDate(card.mdate) ? card.mdate.valueOf() : 0;
+      }, function () {
+        CardsService.save(card);
+      }));
+    };
+    
+    /**
+     * watch all existing cards
+     */
+    angular.forEach(CardsService.getAll(), watchCard );
+
+    /**
+     * deregister all watches when scope is destroyed
+     */
+    $scope.$on('$destroy', function () {
+      angular.forEach(deregistrationFns, function (dfn) {
+        dfn();
+      });
+    });
+  
+    /**
+     * define scope vars
+     */
+    $scope.cardList = CardsService.getAll();
+    $scope.addCard = function () {
+      watchCard(CardsService.add());
+    };
+    $scope.onTagClick = function (tag) {
+      $log.info(tag);
+    };
   }
 ]);

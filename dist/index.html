@@ -16,7 +16,8 @@
     <div class="card card-new" ng-click="addCard()">
       Neue Karte
     </div>
-    <cc-card ng-repeat="card in cardList" cc-card-model="card" class="card"></cc-card>
+    <cc-card ng-repeat="card in cardList | orderBy:'cdate':true" cc-card-model="card"
+    class="card" linkable-tags on-tag-click="onTagClick"></cc-card>
   </div>
 </body>
 </html>

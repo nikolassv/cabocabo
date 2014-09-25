@@ -516,7 +516,7 @@ angular.module('angular-nsv-tagmanager', [])
        * other elements (its properties).
        */
       function Index () {
-        var index = {}
+        var index = {},
             that = this;
         
         /**
@@ -639,7 +639,6 @@ angular.module('angular-nsv-tagmanager', [])
               throw new TypeError('expected argument to be of type Set or Array');
             }
             if (add) {
-              console.log(e,s);
               indexes[a].addMany(e, s);
               indexes[b].addToMany(s, e);
             } else {

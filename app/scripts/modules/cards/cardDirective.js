@@ -7,17 +7,17 @@ angular.module('cards').directive('ccCard', function () {
     templateUrl : 'views/cardView.html',
     transclude : true,
     link : function ($scope, $element) {
-      var elCard = $element.find('.card'),
-          elEdit = elCard.find('.card-editor');
+      var elEdit = $element.find('.card-editor');
       
       $scope.edit = function () {
-        elCard.addClass('edit');
+        $element.addClass('edit');
         elEdit.focus();
       };
 
       elEdit.on('focusout', function () {
-        elCard.removeClass('edit');
-        $scope.card.save();
+        $element.removeClass('edit');
+        $scope.card.setModificationDate();
+        $scope.$apply();
       });
     }
   };

@@ -33,14 +33,15 @@ angular.module('cards').service('CardsService', [
     };
 
     /**
-     * add a new card
+     * add a card
      *
      * @return {CardModel}
      */
-    this.add = function () {
-      var newCard = new CardModel(thisService);
+    this.add = function (card) {
+      var newCard = (card instanceof CardModel) ?
+                      card :
+                      new CardModel(thisService);
       cards.push(newCard);
-      saveToLocalStorage();
       return newCard;
     };
 

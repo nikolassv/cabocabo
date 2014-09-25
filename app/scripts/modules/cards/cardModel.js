@@ -14,6 +14,11 @@ angular.module('cards').factory('CardModel', function () {
      */
     this.cdate = new Date();
 
+    /**
+     * modification date
+     * @type {Date}
+     */
+     this.mdate = new Date();
 
     /**
      * set card data from a raw object
@@ -26,8 +31,12 @@ angular.module('cards').factory('CardModel', function () {
         this.content = obj.content;
       }
 
-      if (angular.isDate(obj.cdate)) {
-        this.cdata = obj.cdate;
+      if (angular.isString(obj.cdate)) {
+        this.cdate = new Date(obj.cdate);
+      }
+
+      if (angular.isString(obj.mdate)) {
+        this.mdate = new Date(obj.mdate);
       }
 
       return this;
@@ -40,6 +49,24 @@ angular.module('cards').factory('CardModel', function () {
      */
     this.save = function () {
       manager.save(this);
+      return this;
+    };
+
+    /**
+     * sets the modification date for a card
+     *
+     * if the parameter is a date it will be set as the new modification date.
+     * otherwise the current date will be the modification date.
+     *
+     * @param {Date?}
+     * @return {CardModel}
+     */
+    this.setModificationDate = function (mdate) {
+      if (angular.isDate(mdate)) {
+        this.mdate = mdate;
+      } else {
+        this.mdate = new Date();
+      }
       return this;
     };
   }
