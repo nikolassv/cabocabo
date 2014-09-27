@@ -3,6 +3,12 @@ angular.module('cards').factory('CardModel', function () {
     var listenerList =[];
 
     /**
+     * the id of this card
+     * @type {number}
+     */
+     this.id = manager.getNextId();
+
+    /**
      * the cards content
      * @type {string}
      */
@@ -19,28 +25,6 @@ angular.module('cards').factory('CardModel', function () {
      * @type {Date}
      */
      this.mdate = new Date();
-
-    /**
-     * set card data from a raw object
-     *
-     * @param {Object}
-     * @return {CardModel}
-     */
-    this.setData = function (obj) {
-      if (angular.isString(obj.content)) {
-        this.content = obj.content;
-      }
-
-      if (angular.isString(obj.cdate)) {
-        this.cdate = new Date(obj.cdate);
-      }
-
-      if (angular.isString(obj.mdate)) {
-        this.mdate = new Date(obj.mdate);
-      }
-
-      return this;
-    };
 
     /**
      * save this card

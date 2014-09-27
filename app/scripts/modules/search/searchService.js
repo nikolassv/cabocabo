@@ -2,6 +2,11 @@ angular.module('search').service('search.SearchService', [
  'angular-nsv-tagmanager.TagIndex', 'angular-nsv-tagmanager.Set', 'search.TagService',
  function (Tagmanager, Set, TagService) {
   /**
+   * local reference to this service
+   */
+  var thisService = this;
+
+  /**
    * the index for all the texts
    * @type {angular-nsv-tagmanager.TagIndex}
    */
@@ -21,13 +26,28 @@ angular.module('search').service('search.SearchService', [
   };
 
   /**
-   * get the ids for a given item from the index
+   * get the ids for a given tag from the index
    *
    * @param {string}
    * @return {Array.<number>}
    */
   this.getIdsForTag = function (tag) {
     return tagIndex.getItemsForTag(tag).toArray();
+  };
+
+  /**
+   * get the ids that match all of the tags in the array
+   */
+  this.getIdsForTags = function (tags) {
+    var ids;
+    angular.forEach(tags, function (tag) {
+      if (ids instanceof Set) {
+        ids = ids.intersect(thisService.getIdsForTag(tag));
+      } else {
+        ids = thisService.getIdsForTag(tag);
+      }
+    });
+    return ids;
   };
  }
 ]);

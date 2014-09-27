@@ -5,10 +5,10 @@ angular.module('cards').service('CardsService', [
         LS_ALL_CARDS = 'cards.allCards', // name in localstorage
 
         /**
-         * an array with all the cards
+         * an object with all the cards
          * @type {Array.<CardModel>}
          */
-        cards = [],
+        cards = {},
 
         /**
          * an array with raw card data from the local storage
@@ -16,11 +16,17 @@ angular.module('cards').service('CardsService', [
          */
         tmpRawCards = LocalStorageService.get(LS_ALL_CARDS),
 
+        /**
+         * next free id for a card
+         * @type {number}
+         */
+        nextId = 0;
+
         // reference to this service
         thisService = this;
 
     var saveToLocalStorage = function () {
-      LocalStorageService.set(LS_ALL_CARDS, cards);
+      LocalStorageService.set(LS_ALL_CARDS, thisService.getAll());
     };
 
     /**
@@ -29,7 +35,30 @@ angular.module('cards').service('CardsService', [
      * @return {array.<CardModel>}
      */
     this.getAll = function () {
-      return cards;
+      var cardArray = [];
+      angular.forEach(cards, function (c) {
+        cardArray.push(c);
+      });
+      return cardArray;
+    };
+
+    /**
+     * return cards with given ids
+     *
+     * @param {number|Array.<number>}
+     * @return {CardModel}
+     */
+    this.getByIds = function (ids) {
+      var cardArray = [];
+      if (!angular.isArray(ids)) {
+        ids = [ids];
+      }
+      angular.forEach(ids, function (id) {
+        if (cards.hasOwnProperty(id)) {
+          cardArray.push(cards[id]); 
+        }
+      });
+      return cardArray;
     };
 
     /**
@@ -41,7 +70,7 @@ angular.module('cards').service('CardsService', [
       var newCard = (card instanceof CardModel) ?
                       card :
                       new CardModel(thisService);
-      cards.push(newCard);
+      cards[card.id] = card;
       return newCard;
     };
 
@@ -63,16 +92,47 @@ angular.module('cards').service('CardsService', [
      * convert an array of card data into an array of CardModels
      *
      * @param {Array.<Object>} arr
-     * @return {Array.<CardModel>}
+     * @return {Object}
      */
     this.convertArray = function (arr) {
-      var newCardArray = [];
+      var newCards = {};
       angular.forEach(arr, function (cardData) {
-        var newCard = new CardModel(thisService);
-        newCard.setData(cardData);
-        newCardArray.push(newCard);
+        var newCard = thisService.createCardFromData(cardData);
+        newCards[newCard.id] = newCard;
       });
-      return newCardArray;
+      return newCards;
+    };
+
+    /**
+     * set card data from a raw object
+     *
+     * @param {Object}
+     * @return {CardModel}
+     */
+    this.createCardFromData = function (cardData) {
+      var newCard = new CardModel(thisService);
+
+      if (angular.isString(cardData.content)) {
+        newCard.content = cardData.content;
+      }
+
+      if (angular.isString(cardData.cdate)) {
+        newCard.cdate = new Date(cardData.cdate);
+      }
+
+      if (angular.isString(cardData.mdate)) {
+        newCard.mdate = new Date(cardData.mdate);
+      }
+
+      return newCard;
+    };
+
+    /**
+     * get the next free id and increment its value
+     * @return {number}
+     */
+    this.getNextId = function () {
+      return nextId++;
     };
 
     /**

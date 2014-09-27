@@ -1,6 +1,6 @@
 angular.module('cabocabo').controller('MainCtrl', [
-  '$log', '$scope', 'CardsService',
-  function ($log, $scope, CardsService) {
+  '$log', '$scope', 'CardsService', 'search.SearchService',
+  function ($log, $scope, CardsService, SearchService) {
     /**
      * deregistration functions
      * @type {Array.<function>}
@@ -8,7 +8,8 @@ angular.module('cabocabo').controller('MainCtrl', [
     var deregistrationFns = [];
 
     /**
-     * watch a card by its modification date and save derigstration functions
+     * watch a card by its modification date and save derigistration functions
+     *
      * @param {CardModel}
      */
     var watchCard = function (card) {
@@ -16,6 +17,7 @@ angular.module('cabocabo').controller('MainCtrl', [
         return angular.isDate(card.mdate) ? card.mdate.valueOf() : 0;
       }, function () {
         CardsService.save(card);
+        SearchService.indexText(card.id, card.content);
       }));
     };
     
@@ -37,11 +39,41 @@ angular.module('cabocabo').controller('MainCtrl', [
      * define scope vars
      */
     $scope.cardList = CardsService.getAll();
+    $scope.searchPhrase = '';
+
+    /**
+     * define scope functions
+     */
+
+    /**
+     * add a new card to the list
+     */
     $scope.addCard = function () {
       watchCard(CardsService.add());
     };
-    $scope.onTagClick = function (tag) {
-      $log.info(tag);
+
+    /**
+     * set the search phrase to a certain tag and do a search
+     */
+    $scope.searchForTag = function (tag) {
+      $scope.searchPhrase = tag;
+      $scope.search();
+    };
+
+    /**
+     * do a search for all the tags in the current search phrase
+     */
+    $scope.search = function () {
+      if (angular.isString($scope.searchPhrase) && $scope.searchPhrase.length > 0) {
+        var tags = $scope.searchPhrase
+                          .toLowerCase()
+                          .replace(/\B#/, '')
+                          .split(' '),
+            ids = SearchService.getIdsForTags(tags);
+        $scope.cardList = CardsService.getByIds(ids);
+      } else {
+        $scope.cardList = CardsService.getAll();
+      }
     };
   }
 ]);

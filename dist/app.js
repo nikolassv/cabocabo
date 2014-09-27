@@ -39,6 +39,12 @@ angular.module('cards').factory('CardModel', function () {
     var listenerList =[];
 
     /**
+     * the id of this card
+     * @type {number}
+     */
+     this.id = manager.getNextId();
+
+    /**
      * the cards content
      * @type {string}
      */
@@ -55,28 +61,6 @@ angular.module('cards').factory('CardModel', function () {
      * @type {Date}
      */
      this.mdate = new Date();
-
-    /**
-     * set card data from a raw object
-     *
-     * @param {Object}
-     * @return {CardModel}
-     */
-    this.setData = function (obj) {
-      if (angular.isString(obj.content)) {
-        this.content = obj.content;
-      }
-
-      if (angular.isString(obj.cdate)) {
-        this.cdate = new Date(obj.cdate);
-      }
-
-      if (angular.isString(obj.mdate)) {
-        this.mdate = new Date(obj.mdate);
-      }
-
-      return this;
-    };
 
     /**
      * save this card
@@ -117,10 +101,10 @@ angular.module('cards').service('CardsService', [
         LS_ALL_CARDS = 'cards.allCards', // name in localstorage
 
         /**
-         * an array with all the cards
+         * an object with all the cards
          * @type {Array.<CardModel>}
          */
-        cards = [],
+        cards = {},
 
         /**
          * an array with raw card data from the local storage
@@ -128,11 +112,17 @@ angular.module('cards').service('CardsService', [
          */
         tmpRawCards = LocalStorageService.get(LS_ALL_CARDS),
 
+        /**
+         * next free id for a card
+         * @type {number}
+         */
+        nextId = 0;
+
         // reference to this service
         thisService = this;
 
     var saveToLocalStorage = function () {
-      LocalStorageService.set(LS_ALL_CARDS, cards);
+      LocalStorageService.set(LS_ALL_CARDS, thisService.getAll());
     };
 
     /**
@@ -141,7 +131,30 @@ angular.module('cards').service('CardsService', [
      * @return {array.<CardModel>}
      */
     this.getAll = function () {
-      return cards;
+      var cardArray = [];
+      angular.forEach(cards, function (c) {
+        cardArray.push(c);
+      });
+      return cardArray;
+    };
+
+    /**
+     * return cards with given ids
+     *
+     * @param {number|Array.<number>}
+     * @return {CardModel}
+     */
+    this.getByIds = function (ids) {
+      var cardArray = [];
+      if (!angular.isArray(ids)) {
+        ids = [ids];
+      }
+      angular.forEach(ids, function (id) {
+        if (cards.hasOwnProperty(id)) {
+          cardArray.push(cards[id]); 
+        }
+      });
+      return cardArray;
     };
 
     /**
@@ -153,7 +166,7 @@ angular.module('cards').service('CardsService', [
       var newCard = (card instanceof CardModel) ?
                       card :
                       new CardModel(thisService);
-      cards.push(newCard);
+      cards[card.id] = card;
       return newCard;
     };
 
@@ -175,16 +188,47 @@ angular.module('cards').service('CardsService', [
      * convert an array of card data into an array of CardModels
      *
      * @param {Array.<Object>} arr
-     * @return {Array.<CardModel>}
+     * @return {Object}
      */
     this.convertArray = function (arr) {
-      var newCardArray = [];
+      var newCards = {};
       angular.forEach(arr, function (cardData) {
-        var newCard = new CardModel(thisService);
-        newCard.setData(cardData);
-        newCardArray.push(newCard);
+        var newCard = thisService.createCardFromData(cardData);
+        newCards[newCard.id] = newCard;
       });
-      return newCardArray;
+      return newCards;
+    };
+
+    /**
+     * set card data from a raw object
+     *
+     * @param {Object}
+     * @return {CardModel}
+     */
+    this.createCardFromData = function (cardData) {
+      var newCard = new CardModel(thisService);
+
+      if (angular.isString(cardData.content)) {
+        newCard.content = cardData.content;
+      }
+
+      if (angular.isString(cardData.cdate)) {
+        newCard.cdate = new Date(cardData.cdate);
+      }
+
+      if (angular.isString(cardData.mdate)) {
+        newCard.mdate = new Date(cardData.mdate);
+      }
+
+      return newCard;
+    };
+
+    /**
+     * get the next free id and increment its value
+     * @return {number}
+     */
+    this.getNextId = function () {
+      return nextId++;
     };
 
     /**
@@ -203,12 +247,9 @@ angular.module('search').directive('linkableTags', [
     var tagFilter = $filter('tags');
     return {
       link : function ($scope, $element, $attr) {
-        $element.on('click', function (evt) {
-          var $target = angular.element(evt.target);
-          if ($target.is('[data-tag]')) {
+        $element.find('[data-tag]').on('click', function (evt) {
             evt.stopPropagation();
-            $parse($attr.onTagClick)($scope.$parent)($target.data('tag'));
-          }
+            $parse($attr.onTagClick)({'tag':this.data('tag')});
         });
       }
     };
@@ -218,6 +259,11 @@ angular.module('search').directive('linkableTags', [
 angular.module('search').service('search.SearchService', [
  'angular-nsv-tagmanager.TagIndex', 'angular-nsv-tagmanager.Set', 'search.TagService',
  function (Tagmanager, Set, TagService) {
+  /**
+   * local reference to this service
+   */
+  var thisService = this;
+
   /**
    * the index for all the texts
    * @type {angular-nsv-tagmanager.TagIndex}
@@ -238,7 +284,7 @@ angular.module('search').service('search.SearchService', [
   };
 
   /**
-   * get the ids for a given item from the index
+   * get the ids for a given tag from the index
    *
    * @param {string}
    * @return {Array.<number>}
@@ -246,38 +292,56 @@ angular.module('search').service('search.SearchService', [
   this.getIdsForTag = function (tag) {
     return tagIndex.getItemsForTag(tag).toArray();
   };
+
+  /**
+   * get the ids that match all of the tags in the array
+   */
+  this.getIdsForTags = function (tags) {
+    var ids;
+    angular.forEach(tags, function (tag) {
+      if (ids instanceof Set) {
+        ids = ids.intersect(thisService.getIdsForTag(tag));
+      } else {
+        ids = thisService.getIdsForTag(tag);
+      }
+    });
+    return ids;
+  };
  }
 ]);
 
-angular.module('search').service('search.TagService', function () {
+angular.module('search').service('search.TagService', [
+  'angular-nsv-tagmanager.Set',
+  function (Set) {
 
-  /**
-   * regex to recognize tags in a text
-   * @type {RegExp}
-   */
-  this.tagRegEx = /#[a-z]+/gi;
+    /**
+     * regex to recognize tags in a text
+     * @type {RegExp}
+     */
+    this.tagRegEx = /\B#[a-z\u00E4\u00F6\u00FC\u00DF\u00E9\u00E8]+/gi;
 
-  /**
-   * extract tags from a text
-   *
-   * @param {string} text
-   * @return {Set}
-   */
-  this.extractTagsFromText = function (text) {
-    var rawTags = text.match(tagRegEx),
-        tags = new Set();
-    angular.forEach(rawTags, function(rT) {
-      tags.insert(rT.slice(1));
-    });
-    return tags;
-  };
-});
+    /**
+     * extract tags from a text
+     *
+     * @param {string} text
+     * @return {Set}
+     */
+    this.extractTagsFromText = function (text) {
+      var rawTags = text.match(this.tagRegEx),
+          tags = new Set();
+      angular.forEach(rawTags, function(rT) {
+        tags.insert(rT.slice(1).toLowerCase());
+      });
+      return tags;
+    };
+  }
+]);
 
 angular.module('search').filter('tags', [
   'search.TagService',
   function (TagService) {
     return function ($input) {
-      return $input.replace(TagService.tagRegEx, '<span class="tag" data-tag="$&">$&</a>'); 
+      return $input.replace(TagService.tagRegEx, '<span class="tag" data-tag="$&">$&</span>'); 
     };
   }
 ]);
@@ -287,8 +351,8 @@ angular.module('cabocabo', [
 ]);
 
 angular.module('cabocabo').controller('MainCtrl', [
-  '$log', '$scope', 'CardsService',
-  function ($log, $scope, CardsService) {
+  '$log', '$scope', 'CardsService', 'search.SearchService',
+  function ($log, $scope, CardsService, SearchService) {
     /**
      * deregistration functions
      * @type {Array.<function>}
@@ -296,7 +360,8 @@ angular.module('cabocabo').controller('MainCtrl', [
     var deregistrationFns = [];
 
     /**
-     * watch a card by its modification date and save derigstration functions
+     * watch a card by its modification date and save derigistration functions
+     *
      * @param {CardModel}
      */
     var watchCard = function (card) {
@@ -304,6 +369,7 @@ angular.module('cabocabo').controller('MainCtrl', [
         return angular.isDate(card.mdate) ? card.mdate.valueOf() : 0;
       }, function () {
         CardsService.save(card);
+        SearchService.indexText(card.id, card.content);
       }));
     };
     
@@ -325,11 +391,41 @@ angular.module('cabocabo').controller('MainCtrl', [
      * define scope vars
      */
     $scope.cardList = CardsService.getAll();
+    $scope.searchPhrase = '';
+
+    /**
+     * define scope functions
+     */
+
+    /**
+     * add a new card to the list
+     */
     $scope.addCard = function () {
       watchCard(CardsService.add());
     };
-    $scope.onTagClick = function (tag) {
-      $log.info(tag);
+
+    /**
+     * set the search phrase to a certain tag and do a search
+     */
+    $scope.searchForTag = function (tag) {
+      $scope.searchPhrase = tag;
+      $scope.search();
+    };
+
+    /**
+     * do a search for all the tags in the current search phrase
+     */
+    $scope.search = function () {
+      if (angular.isString($scope.searchPhrase) && $scope.searchPhrase.length > 0) {
+        var tags = $scope.searchPhrase
+                          .toLowerCase()
+                          .replace(/\B#/, '')
+                          .split(' '),
+            ids = SearchService.getIdsForTags(tags);
+        $scope.cardList = CardsService.getByIds(ids);
+      } else {
+        $scope.cardList = CardsService.getAll();
+      }
     };
   }
 ]);

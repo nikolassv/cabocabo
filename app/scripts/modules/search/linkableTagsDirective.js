@@ -4,12 +4,9 @@ angular.module('search').directive('linkableTags', [
     var tagFilter = $filter('tags');
     return {
       link : function ($scope, $element, $attr) {
-        $element.on('click', function (evt) {
-          var $target = angular.element(evt.target);
-          if ($target.is('[data-tag]')) {
+        $element.find('[data-tag]').on('click', function (evt) {
             evt.stopPropagation();
-            $parse($attr.onTagClick)($scope.$parent)($target.data('tag'));
-          }
+            $parse($attr.onTagClick)({'tag':this.data('tag')});
         });
       }
     };

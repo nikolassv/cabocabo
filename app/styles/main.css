@@ -73,6 +73,17 @@ body {
   margin-bottom: 0.8em;
 }
 
+.card-body-text .tag {
+  display: inline-block;
+  border: 1px solid #67AED1;
+  background-color: #F3FBFE;
+  padding: 0px 4px;
+  border-radius: 6px;
+  color: #67AED1;
+  font-weight: bold;
+  font-size: 13px;
+}
+
 .card.edit .card-body {
   display: none;
 }
