@@ -9,6 +9,8 @@ angular.module('cards', [
   'search'
 ]);
 
+angular.module('angular-nsv-tagsearch', []);
+
 angular.module('cards').directive('ccCard', function () {
   return {
     restrict : 'E',
@@ -246,11 +248,10 @@ angular.module('search').directive('linkableTags', [
   function ($filter, $parse, TagService) {
     var tagFilter = $filter('tags');
     return {
-      link : function ($scope, $element, $attr) {
-        $element.find('[data-tag]').on('click', function (evt) {
-            evt.stopPropagation();
-            $parse($attr.onTagClick)({'tag':this.data('tag')});
-        });
+      controller : function ($scope, $element, $attrs) {
+        this.onClick = function (tag) {
+            $parse($attrs.onTagClick)($scope.$parent, {'tag':tag});
+        };
       }
     };
   }
@@ -307,8 +308,40 @@ angular.module('search').service('search.SearchService', [
     });
     return ids;
   };
+
+  /**
+   * return all existing tags
+   */
+  this.getAllTags = function () {
+    return tagIndex.getAllTags();
+  };
  }
 ]);
+
+angular.module('search')
+  .directive('containsTags', ['$filter', function ($filter) {
+    var tagFilter = $filter('tags');
+    return {
+      require : '^linkableTags',
+      link : function ($scope, $element, $attrs, $LnTagsCtrl) {
+        var addTags = function () {
+          $element.html(tagFilter($element.text()));
+          $element.find('tag').on('click', function (evt) {
+            $LnTagsCtrl.onClick($(this).data('tag'));
+            evt.stopPropagation();
+            evt.preventDefault();
+            $scope.$apply();
+          });
+        };
+        var deregistrationFn = $scope.$watch(function () {
+          return $element.text();
+        }, function () {
+          addTags();
+        });
+        $scope.$on('$destroy', deregistrationFn);
+      }
+    };
+  }]);
 
 angular.module('search').service('search.TagService', [
   'angular-nsv-tagmanager.Set',
@@ -341,13 +374,237 @@ angular.module('search').filter('tags', [
   'search.TagService',
   function (TagService) {
     return function ($input) {
-      return $input.replace(TagService.tagRegEx, '<span class="tag" data-tag="$&">$&</span>'); 
+      return $input.replace(TagService.tagRegEx, '<tag class="tag" data-tag="$&">$&</tag>'); 
     };
   }
 ]);
 
+
+angular.module('angular-nsv-tagsearch')
+	.directive('tagsearch', function () {
+		return {
+			restrict : 'EA',
+			templateUrl : 'views/tagsearchView.html',
+      scope : {
+        allTags : '='
+      },
+			controller : function () {
+				var thisCtrl = this;
+				thisCtrl.tagList = [];
+				thisCtrl.removeTag = function (i, evt) {
+					evt.stopPropagation();
+					return thisCtrl.tagList.splice(i,1);
+				};
+				thisCtrl.removeLast = function () {
+					return thisCtrl.tagList.pop();
+				};
+				thisCtrl.addTag = function (tagStr) {
+					tagStr = (''+tagStr)
+								.replace(/^#/,'')
+								.replace(/ /, '');
+					if (tagStr.length > 0) {
+						if (thisCtrl.tagList.indexOf(tagStr) === -1) {
+							thisCtrl.tagList.push(tagStr);
+						}
+					}
+					return thisCtrl.tagList;
+				};
+			},
+			link : function ($scope, $element, $attrs, ctrl) {
+				$scope.tagList = ctrl.tagList;
+				$scope.removeTag = ctrl.removeTag;
+			}
+		};
+	});
+
+angular.module('angular-nsv-tagsearch')
+	.directive('tagsearchInput', function () {
+		var widthDefiningStyles = [ 'font-size', 'font-family', 'margin', 'padding', 'min-width' ],
+			copyCssStyles = function (elSrc, elDest) {
+				var destStyles = {};
+				angular.forEach(widthDefiningStyles, function (style) {
+				  destStyles[style] = elSrc.css(style); 
+				});
+				elDest.css(destStyles); 
+			};
+		
+		return {
+			restrict : 'EA',
+			require : ['^tagsearch', '^keyselectContainer'],
+			link : function ($scope, $element, $attrs, Ctrls) {
+        var // a clone of the current element as div
+            elClone = angular.element('<div>'),
+
+            /**
+             * set the width of the input field to the with of its containing text
+             *
+             * will set the containing text as text of the clone and set the width
+             * of the input field to the width of the clone
+             */
+            setEqualWidth = function () {
+              copyCssStyles($element, elClone);
+              elClone.text($scope.searchText);
+              $element.width(elClone.width()+3);
+            },
+				
+          TagSearchCtrl = Ctrls[0],
+          KscCtrl = Ctrls[1];
+
+				elClone.hide().appendTo($element.parent());
+        
+				$scope.searchText = '';
+        KscCtrl.setFilterText($scope.searchText);
+				
+				/**
+				 * react to click on parent
+				 */
+				$element.parents('tagsearch,[tagsearch],[data-tagsearch]').on('click', function () {
+					$element.focus();
+				});
+				
+				/**
+				 * react to changes in the search text
+				 */
+				$scope.$watch('searchText', function () {
+					// add the current search text as a new tag, if it ends with whitespace
+					var parts = $scope.searchText.match(/(.*)\s$/);
+					if (angular.isArray(parts)) {
+						TagSearchCtrl.addTag(parts[1]);
+						$scope.searchText = '';
+					}
+					setEqualWidth();
+
+          // propagate changes in search text to KscCtrl
+          KscCtrl.setFilterText($scope.searchText);
+				});
+				
+				/**
+				 * react on keypress
+				 */
+				$element.on('keydown', function (evt) {
+					switch (evt.which) {
+            case 40: // cursor down: select next suggestion
+              KscCtrl.incSelectedIndex();
+              $scope.$apply();
+              break;
+            case 38: // cursor up: select previous suggestion
+              KscCtrl.decSelectedIndex();
+              $scope.$apply();
+              break;
+						case 13: // return: add current search string as tag
+              if (KscCtrl.getSelectedIndex() > -1) {
+                $scope.searchText = KscCtrl.getSelection();
+                KscCtrl
+                  .reset();
+              } else {
+                TagSearchCtrl.addTag($scope.searchText);
+                $scope.searchText = '';
+              }
+							$scope.$apply();
+							break;
+						case 8: // backspace: remove last tag
+							if ($scope.searchText.length === 0) {
+								$scope.searchText = TagSearchCtrl.removeLast();
+								$scope.$apply();
+							}
+							break;
+						// do nothing on default
+					} 
+				});
+			}
+		};
+	}).directive('keyselectContainer', ['$parse', '$filter', function ($parse, $filter) {
+    return {
+      scope : {
+        items : '=' 
+      },
+      controller : ['$scope', '$element', function ($scope, $element) {
+        var selectedIndex = -1,
+            filterText = '',
+            suggestions = [];
+
+        this.reset = function () {
+          selectedIndex = -1;
+          return this;
+        };
+
+        this.setFilterText = function (newFilterText) {
+          if (filterText !== newFilterText) {
+            filterText = newFilterText;
+            this.updateSuggestions();
+          } 
+          return this;
+        };
+
+        this.updateSuggestions = function () {
+          var l = suggestions.length;
+          suggestions = $filter('filter')($scope.items, filterText);
+          if ((suggestions.length !== l) && (selectedIndex >= suggestions.length)) {
+            selectedIndex = suggestionNumber - 1;
+          }
+        };
+
+        this.getSuggestions = function () {
+          return suggestions;
+        };
+
+        this.getSelectedIndex = function () {
+          return selectedIndex;
+        };
+
+        this.incSelectedIndex = function () {
+          selectedIndex++;
+          if (selectedIndex >= suggestions.length) {
+            selectedIndex = -1;
+          }
+          return this;
+        };
+
+        this.decSelectedIndex = function () {
+          selectedIndex--;
+          if (selectedIndex < -1) {
+            selectedIndex = suggestions.length - 1;
+          }
+          return this;
+        };
+        
+        this.getSelection = function () {
+          return (selectedIndex > -1) ? suggestions[selectedIndex] : null;
+        };
+
+      }]
+    };
+  }])
+  .directive('suggestionList', function() {
+    return {
+      require : '^keyselectContainer',
+      templateUrl : 'views/suggestionListView.html',
+      replace : true,
+			link : function ($scope, $element, $attrs, KscCtrl) {
+
+				$scope.selectedIndex = KscCtrl.getSelectedIndex();
+        $scope.$watch(function () {
+          return KscCtrl.getSelectedIndex();
+        }, function () {
+          $scope.selectedIndex = KscCtrl.getSelectedIndex();
+        }); 
+				
+        KscCtrl.updateSuggestions();
+        $scope.suggestionList = KscCtrl.getSuggestions();
+        $scope.$watch(function () {
+          return KscCtrl.getSuggestions();
+        }, function () {
+          $scope.suggestionList = KscCtrl.getSuggestions();
+        });
+
+			}
+		};
+	});
+
+
 angular.module('cabocabo', [
-  'cards'
+  'cards',
+  'angular-nsv-tagsearch'
 ]);
 
 angular.module('cabocabo').controller('MainCtrl', [
@@ -392,6 +649,11 @@ angular.module('cabocabo').controller('MainCtrl', [
      */
     $scope.cardList = CardsService.getAll();
     $scope.searchPhrase = '';
+
+    $scope.allTags = SearchService.getAllTags().toArray();
+    $scope.$watch(SearchService.getAllTags, function () {
+      $scope.allTags = SearchService.getAllTags().toArray();
+    });
 
     /**
      * define scope functions

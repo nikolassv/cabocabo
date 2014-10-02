@@ -38,7 +38,7 @@ body {
   padding: 20px;
   margin: 15px auto;
   background-color: #fafafa;
-  border-radius: 4px;
+  border-radius: 3px;
   box-shadow: 2px 2px 6px #ccc;
   font-size: 14px;
   font-family: Helvetica, Arial, sans-serif;
@@ -73,12 +73,13 @@ body {
   margin-bottom: 0.8em;
 }
 
-.card-body-text .tag {
+.card-body tag,
+.tag{
   display: inline-block;
   border: 1px solid #67AED1;
   background-color: #F3FBFE;
-  padding: 0px 4px;
-  border-radius: 6px;
+  padding: 0px 2px;
+  border-radius: 4px;
   color: #67AED1;
   font-weight: bold;
   font-size: 13px;

@@ -517,7 +517,8 @@ angular.module('angular-nsv-tagmanager', [])
        */
       function Index () {
         var index = {},
-            that = this;
+            that = this,
+            keys = new Set();
         
         /**
          * applies a method on many elements
@@ -555,6 +556,13 @@ angular.module('angular-nsv-tagmanager', [])
         }
 
         /**
+         * return all elements with a property
+         */
+        this.getElements = function () {
+          return keys;
+        }
+
+        /**
          * add one property to an element
          */
         this.addOne = function (r1, r2) {
@@ -562,6 +570,7 @@ angular.module('angular-nsv-tagmanager', [])
           if (!index.hasOwnProperty(r1)) {
             index[r1] = new Set();
           }
+          keys.insert(r1);
           index[r1].insert(r2);
           return this;
         }
@@ -573,6 +582,9 @@ angular.module('angular-nsv-tagmanager', [])
           r1 = ''+r1;
           if (index.hasOwnProperty(r1)) {
             index[r1].remove(r2);
+            if (index[r1].size() === 0) {
+              keys.remove(r2);
+            }
           }
           return this;
         }
@@ -647,6 +659,24 @@ angular.module('angular-nsv-tagmanager', [])
             }
           }
         
+        /**
+         * return all As which are related to at least one B
+         *
+         * @return {Set}
+         */
+        this.getAllAs = function () {
+          return indexes[0].getElements();
+        }
+
+        /**
+         * return all Bs which are related to at least one A
+         *
+         * @return {Set}
+         */
+        this.getAllBs = function () {
+          return indexes[1].getElements();
+        }
+
         /**
          * set all Bs that are related to a certain A
          *
@@ -758,6 +788,15 @@ angular.module('angular-nsv-tagmanager', [])
          */
         this.getItemsForTag = function getItemsForTag (tag) {
           return tagIndex.getBToA(tag);
+        }
+
+        /**
+         * get all the tags wich are related to at least one item
+         *
+         * @return {Set}
+         */
+        this.getAllTags = function getAllTags () {
+          return tagIndex.getAllBs();
         }
       }
 

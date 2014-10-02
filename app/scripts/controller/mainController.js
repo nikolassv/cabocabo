@@ -41,6 +41,11 @@ angular.module('cabocabo').controller('MainCtrl', [
     $scope.cardList = CardsService.getAll();
     $scope.searchPhrase = '';
 
+    $scope.allTags = SearchService.getAllTags().toArray();
+    $scope.$watch(SearchService.getAllTags, function () {
+      $scope.allTags = SearchService.getAllTags().toArray();
+    });
+
     /**
      * define scope functions
      */

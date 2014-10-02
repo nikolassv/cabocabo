@@ -1,0 +1,11 @@
+<div class="tagsearch-wrapper" keyselect-container items="allTags">
+  <div class="tagsearch-container">
+    <ul class="tagsearch-selected-tags">
+      <li class="tagsearch-selected-tag tag" ng-repeat="tag in tagList">
+        {{tag}}<!--<span class="tagsearch-tag-remove"  ng-click="removeTag($index, $event)">X</span>-->
+      </li>
+    </ul>
+      <input data-tagsearch-input class="tagsearch-input" type="text" ng-model="searchText" ng-trim="false">
+  </div>
+  <div suggestion-list></div>
+</div>

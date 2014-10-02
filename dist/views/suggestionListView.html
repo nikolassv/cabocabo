@@ -1,0 +1,5 @@
+<ul class="tagsearch-suggestions">
+  <li suggestion ng-repeat="suggestion in suggestionList" 
+    ng-class="{'tagsearch-selected-suggestion': ($index === selectedIndex)}"
+    class="tagsearch-suggestion">{{suggestion}}</li>
+</ul>

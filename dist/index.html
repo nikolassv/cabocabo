@@ -13,12 +13,14 @@
 		<input type="text" class="commandbar-input" 
       ng-model="searchPhrase" ng-change="search()"/>
 	</div>
+  <tagsearch all-tags="allTags"></tagsearch>
   <div id="desk">
     <div class="card card-new" ng-click="addCard()">
       Neue Karte
     </div>
-    <cc-card ng-repeat="card in cardList track by card.id | orderBy:'cdate':true" cc-card-model="card"
-    class="card" linkable-tags on-tag-click="searchForTag(tag)"></cc-card>
+    <cc-card ng-repeat="card in cardList track by card.id | orderBy:'cdate':true" 
+    cc-card-model="card" class="card" 
+    linkable-tags on-tag-click="searchForTag(tag)"></cc-card>
   </div>
 </body>
 </html>

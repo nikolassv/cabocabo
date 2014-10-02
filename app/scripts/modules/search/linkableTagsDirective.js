@@ -3,11 +3,10 @@ angular.module('search').directive('linkableTags', [
   function ($filter, $parse, TagService) {
     var tagFilter = $filter('tags');
     return {
-      link : function ($scope, $element, $attr) {
-        $element.find('[data-tag]').on('click', function (evt) {
-            evt.stopPropagation();
-            $parse($attr.onTagClick)({'tag':this.data('tag')});
-        });
+      controller : function ($scope, $element, $attrs) {
+        this.onClick = function (tag) {
+            $parse($attrs.onTagClick)($scope.$parent, {'tag':tag});
+        };
       }
     };
   }

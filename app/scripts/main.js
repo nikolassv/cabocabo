@@ -1,3 +1,4 @@
 angular.module('cabocabo', [
-  'cards'
+  'cards',
+  'angular-nsv-tagsearch'
 ]);

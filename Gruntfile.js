@@ -5,13 +5,17 @@ module.exports = function (grunt) {
     },
     jshint : {
       dist : {
-        src : ['app/scripts/**/*']
+        src : ['app/scripts/**/*.js']
       }
     },
     concat : {
       dist : {
         files : {
-          'dist/styles.css': ['app/styles/reset.css', 'app/styles/main.css'],
+          'dist/styles.css': [
+            'app/styles/reset.css',
+            'app/styles/main.css',
+            'app/styles/tagsearch.css'
+          ],
           'dist/lib.js' : [
             'lib/jquery/dist/jquery.min.js',
             'lib/angular/angular.min.js',
@@ -29,6 +33,7 @@ module.exports = function (grunt) {
              */
             'app/scripts/modules/searchModule.js',
             'app/scripts/modules/cardsModule.js',
+            'app/scripts/modules/tagsearchModule.js',
             
             'app/scripts/modules/**/*.js',   // module assets
             'app/scripts/main.js',        // application module definition

@@ -49,5 +49,12 @@ angular.module('search').service('search.SearchService', [
     });
     return ids;
   };
+
+  /**
+   * return all existing tags
+   */
+  this.getAllTags = function () {
+    return tagIndex.getAllTags();
+  };
  }
 ]);
