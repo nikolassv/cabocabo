@@ -32,6 +32,7 @@ angular.module('search').service('search.SearchService', [
    * @return {Array.<number>}
    */
   this.getIdsForTag = function (tag) {
+    tag = tag.toLowerCase();
     return tagIndex.getItemsForTag(tag).toArray();
   };
 
@@ -41,6 +42,7 @@ angular.module('search').service('search.SearchService', [
   this.getIdsForTags = function (tags) {
     var ids;
     angular.forEach(tags, function (tag) {
+      tag = tag.toLowerCase();
       if (ids instanceof Set) {
         ids = ids.intersect(thisService.getIdsForTag(tag));
       } else {

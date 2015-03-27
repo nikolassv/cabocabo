@@ -15,21 +15,25 @@ angular.module('cards').directive('ccCard', function () {
   return {
     restrict : 'E',
     scope : {
-      card : '=ccCardModel'
+      card : '=ccCardModel',
+      onSave : '&'
     },
     templateUrl : 'views/cardView.html',
     transclude : true,
     link : function ($scope, $element) {
       var elEdit = $element.find('.card-editor');
       
-      $scope.edit = function () {
+      $element.on('click', function () {
         $element.addClass('edit');
         elEdit.focus();
-      };
+        return false;
+      });
 
       elEdit.on('focusout', function () {
         $element.removeClass('edit');
         $scope.card.setModificationDate();
+        $scope.card.save();
+        $scope.onSave($scope.card);
         $scope.$apply();
       });
     }
@@ -37,14 +41,14 @@ angular.module('cards').directive('ccCard', function () {
 });
 
 angular.module('cards').factory('CardModel', function () {
-  function CardModel (manager) {
-    var listenerList =[];
+  function CardModel () {
+    var manager;
 
     /**
      * the id of this card
-     * @type {number}
+     * @type {number|undefined}
      */
-     this.id = manager.getNextId();
+     this.id = undefined;
 
     /**
      * the cards content
@@ -62,7 +66,18 @@ angular.module('cards').factory('CardModel', function () {
      * modification date
      * @type {Date}
      */
-     this.mdate = new Date();
+    this.mdate = new Date();
+
+    /**
+     * sets the manager
+     * 
+     * @param {CardService} new Manager
+     * @return {CardModel}
+     */
+    this.setManager = function (newManager) {
+      manager = newManager;
+      return this;
+    };
 
     /**
      * save this card
@@ -70,7 +85,9 @@ angular.module('cards').factory('CardModel', function () {
      * @return {CardModel}
      */
     this.save = function () {
-      manager.save(this);
+      if (angular.isObject(manager) && angular.isFunction(manager.save)) {
+        manager.save(this);
+      }
       return this;
     };
 
@@ -168,7 +185,16 @@ angular.module('cards').service('CardsService', [
       var newCard = (card instanceof CardModel) ?
                       card :
                       new CardModel(thisService);
-      cards[card.id] = card;
+
+      newCard.setManager(this);
+
+      if (angular.isUndefined(newCard.id)) {
+        newCard.id = this.getNextId();
+      }
+
+      cards[newCard.id] = newCard;
+      this.save();
+
       return newCard;
     };
 
@@ -208,7 +234,7 @@ angular.module('cards').service('CardsService', [
      * @return {CardModel}
      */
     this.createCardFromData = function (cardData) {
-      var newCard = new CardModel(thisService);
+      var newCard = new CardModel();
 
       if (angular.isString(cardData.content)) {
         newCard.content = cardData.content;
@@ -221,6 +247,8 @@ angular.module('cards').service('CardsService', [
       if (angular.isString(cardData.mdate)) {
         newCard.mdate = new Date(cardData.mdate);
       }
+
+      thisService.add(newCard);
 
       return newCard;
     };
@@ -242,6 +270,51 @@ angular.module('cards').service('CardsService', [
     $rootScope.$on('$destroy', saveToLocalStorage);
   }
 ]);
+
+angular.module('cards')
+  .directive('ccNewCard', ['$timeout', 'CardModel', function ($timeout, CardModel) {
+    return {
+      restrict: 'E',
+      scope: {
+        addCard: '&'
+      },
+      templateUrl: 'views/newCardView.html',
+      link: function ($scope, $element) {
+        var elButton = $element.find('[data-new-button]'),
+            elCardEdit = $element.find('[data-card]');
+
+        $scope.STATUS_BUTTON = 1;
+        $scope.STATUS_CARD = 2;
+
+        $scope.currentStatus = $scope.STATUS_BUTTON;
+
+        $scope.newCard = new CardModel();
+
+        /**
+         * show the new card and let the user edit it
+         */
+        $scope.editNewCard = function () {
+          $scope.currentStatus = $scope.STATUS_CARD;
+          $timeout(function () {
+            elCardEdit.trigger('click');
+          });
+        };
+
+        /**
+         * tell the parent that a new card has been saved and replace the modified
+         * card with a new one
+         */
+        $scope.saveCard = function () {
+          if ($scope.newCard.content.length > 0) {
+            $scope.addCard({card: $scope.newCard});
+            $scope.newCard = new CardModel();
+          }
+
+          $scope.currentStatus = $scope.STATUS_BUTTON;
+        };
+      }
+    };
+  }]);
 
 angular.module('search').directive('linkableTags', [
   '$filter', '$parse', 'search.TagService',
@@ -291,6 +364,7 @@ angular.module('search').service('search.SearchService', [
    * @return {Array.<number>}
    */
   this.getIdsForTag = function (tag) {
+    tag = tag.toLowerCase();
     return tagIndex.getItemsForTag(tag).toArray();
   };
 
@@ -300,6 +374,7 @@ angular.module('search').service('search.SearchService', [
   this.getIdsForTags = function (tags) {
     var ids;
     angular.forEach(tags, function (tag) {
+      tag = tag.toLowerCase();
       if (ids instanceof Set) {
         ids = ids.intersect(thisService.getIdsForTag(tag));
       } else {
@@ -379,6 +454,177 @@ angular.module('search').filter('tags', [
   }
 ]);
 
+angular.module('angular-nsv-tagsearch')
+  .directive('keyselectContainer', ['$parse', '$filter', function ($parse, $filter) {
+
+    return {
+      controller : ['$scope', '$element', function ($scope, $element) {
+
+        var selectedIndex = -1;
+        var listSource = function () {return [];};
+        var searchText = '';
+
+
+        /**
+         * resets the suggestion list
+         *
+         * @return {object} this
+         */
+        this.reset = function () {
+          selectedIndex = -1;
+          return this;
+        };
+
+        /**
+         * returns the currently selected index
+         *
+         * @return {number}
+         */
+        this.getSelectedIndex = function () {
+          return selectedIndex;
+        };
+
+        /**
+         * increments the selected index
+         *
+         * @return {object} this
+         */
+        this.incSelectedIndex = function () {
+          selectedIndex++;
+          if (selectedIndex >= listSource().length) {
+            selectedIndex = -1;
+          }
+          return this;
+        };
+
+        /**
+         * decrements the selected index
+         *
+         * @return {object} this
+         */
+        this.decSelectedIndex = function () {
+          selectedIndex--;
+          if (selectedIndex < -1) {
+            selectedIndex = listSource().length - 1;
+          }
+          return this;
+        };
+        
+        /**
+         * returns the current suggestion
+         *
+         * @return {string}
+         */
+        this.getSelection = function () {
+          return (selectedIndex > -1) ? listSource()[selectedIndex] : null;
+        };
+
+        /**
+         * registers a function as a list getter
+         *
+         * the function is supposed to return the current list of suggestions
+         *
+         * @param {function} listGetter
+         */
+        this.registerListGetter = function (listGetter) {
+          listSource = listGetter;
+        };
+
+        this.setSearchText = function (newSearchText) {
+          searchText = newSearchText;
+          return this;
+        };
+        
+        this.getSearchText = function () {
+          return searchText;
+        };
+
+      }]
+    };
+  }]);
+
+angular.module('angular-nsv-tagsearch')
+  .directive('suggestionList', ['$filter', function($filter) {
+    var filterFilter = $filter('filter');
+
+    return {
+      require : ['^tagsearch', '^keyselectContainer'],
+      templateUrl : 'views/suggestionListView.html',
+      scope : {
+        items : '=',
+        blacklist : '='
+      },
+			link : function ($scope, $element, $attrs, Ctrls) {
+        var TagsrchCtrl = Ctrls[0],
+            KscCtrl = Ctrls[1];
+
+        $scope.suggestions = [];
+
+        KscCtrl.registerListGetter(function () {
+          return $scope.suggestions;
+        });
+
+        /**
+         * updates the list of suggestions for the user
+         *
+         * @return {array.<string>} the current suggestions
+         */
+        var updateSuggestions = function (filterText) {
+          var l = $scope.suggestions.length;
+          $scope.suggestions = filterFilter($scope.items, filterText);
+          if (($scope.suggestions.length !== l) && ($scope.selectedIndex >= $scope.suggestions.length)) {
+            $scope.selectedIndex = $scope.suggestions.length - 1;
+          }
+          if (angular.isArray($scope.blacklist)) {
+            $scope.suggestions = $scope.suggestions.filter(function (suggestion) {
+              return $scope.blacklist.indexOf(suggestion) === -1;
+            });
+          }
+          return $scope.suggestions;
+        };
+
+        /**
+         * update suggestions whenever the filter text change
+         */
+        $scope.$watch(function () {
+          return KscCtrl.getSearchText();
+        }, updateSuggestions);
+
+        /**
+         * update suggestions whenever the blacklisted items change
+         */
+        $scope.$watchCollection('blacklist', updateSuggestions);
+
+
+        /**
+         * get the selected index from the keyselect controller
+         */
+				$scope.selectedIndex = KscCtrl.getSelectedIndex();
+
+        /**
+         * update the selected index whenever the index in the keyselect controller changes
+         */
+        $scope.$watch(function () {
+          return KscCtrl.getSelectedIndex();
+        }, function (selectedIndex) {
+          $scope.selectedIndex = selectedIndex;
+        }); 
+				
+        /**
+         * selects a tag for the list
+         *
+         * @param {string} the tag
+         * @param {event} the event that triggered the selection
+         */
+        $scope.selectTag = function (tag, evt) {
+          evt.stopPropagation();
+          evt.preventDefault();
+          TagsrchCtrl.addTag(tag);
+          KscCtrl.reset();
+        };
+			}
+		};
+	}]);
 
 angular.module('angular-nsv-tagsearch')
 	.directive('tagsearch', function () {
@@ -386,51 +632,102 @@ angular.module('angular-nsv-tagsearch')
 			restrict : 'EA',
 			templateUrl : 'views/tagsearchView.html',
       scope : {
-        allTags : '='
+        allTags : '=',
+        selectedTags : '=',
+        onTaglistChange : '&'
       },
-			controller : function () {
+			controller : ['$scope', function ($scope) {
 				var thisCtrl = this;
-				thisCtrl.tagList = [];
+				$scope.selectedTags = [];
+
+        /**
+         * whether the tag list has the focus
+         */
+        $scope.hasFocus = false;
+
+        /**
+         * removes a tag inside the last and return its label
+         *
+         * @param {number} i index of the tag in the list
+         * @param {event} evt
+         */
 				thisCtrl.removeTag = function (i, evt) {
 					evt.stopPropagation();
-					return thisCtrl.tagList.splice(i,1);
+					var removedTag = $scope.selectedTags.splice(i,1);
+          $scope.$broadcast('taglist-changed-remove');
+          $scope.onTaglistChange();
+          return removedTag;
 				};
+
+        /**
+         * removes the last tag and returns its label
+         */
 				thisCtrl.removeLast = function () {
-					return thisCtrl.tagList.pop();
+					var removedTag = $scope.selectedTags.pop();
+          $scope.$broadcast('taglist-changed-remove');
+          $scope.onTaglistChange();
+          return removedTag;
 				};
+
+        /**
+         * add a tag to the list and return its label
+         *
+         * @param {string} tagStr
+         */
 				thisCtrl.addTag = function (tagStr) {
 					tagStr = (''+tagStr)
 								.replace(/^#/,'')
 								.replace(/ /, '');
 					if (tagStr.length > 0) {
-						if (thisCtrl.tagList.indexOf(tagStr) === -1) {
-							thisCtrl.tagList.push(tagStr);
+						if ($scope.selectedTags.indexOf(tagStr) === -1) {
+							$scope.selectedTags.push(tagStr);
 						}
 					}
-					return thisCtrl.tagList;
+          $scope.$broadcast('taglist-changed-add');
+          $scope.onTaglistChange();
+					return $scope.selectedTags;
 				};
-			},
+
+        /**
+         * set focus
+         */
+        thisCtrl.setFocus = function () {
+          $scope.hasFocus = true;
+        };
+
+        /**
+         * remove focus
+         */
+        thisCtrl.removeFocus = function () {
+          $scope.hasFocus = false;
+        };
+			}],
+      
 			link : function ($scope, $element, $attrs, ctrl) {
-				$scope.tagList = ctrl.tagList;
 				$scope.removeTag = ctrl.removeTag;
+        $scope.addTag = ctrl.addTag;
+        $scope.checkInput = ctrl.checkInput;
 			}
+
 		};
 	});
 
 angular.module('angular-nsv-tagsearch')
 	.directive('tagsearchInput', function () {
 		var widthDefiningStyles = [ 'font-size', 'font-family', 'margin', 'padding', 'min-width' ],
-			copyCssStyles = function (elSrc, elDest) {
-				var destStyles = {};
-				angular.forEach(widthDefiningStyles, function (style) {
-				  destStyles[style] = elSrc.css(style); 
-				});
-				elDest.css(destStyles); 
-			};
+
+        copyCssStyles = function (elSrc, elDest) {
+          var destStyles = {};
+          angular.forEach(widthDefiningStyles, function (style) {
+            destStyles[style] = elSrc.css(style); 
+          });
+          elDest.css(destStyles); 
+        };
 		
 		return {
 			restrict : 'EA',
 			require : ['^tagsearch', '^keyselectContainer'],
+      scope : true,
 			link : function ($scope, $element, $attrs, Ctrls) {
         var // a clone of the current element as div
             elClone = angular.element('<div>'),
@@ -447,13 +744,12 @@ angular.module('angular-nsv-tagsearch')
               $element.width(elClone.width()+3);
             },
 				
-          TagSearchCtrl = Ctrls[0],
-          KscCtrl = Ctrls[1];
+            TagSearchCtrl = Ctrls[0],
+            KscCtrl = Ctrls[1];
 
 				elClone.hide().appendTo($element.parent());
         
 				$scope.searchText = '';
-        KscCtrl.setFilterText($scope.searchText);
 				
 				/**
 				 * react to click on parent
@@ -461,22 +757,31 @@ angular.module('angular-nsv-tagsearch')
 				$element.parents('tagsearch,[tagsearch],[data-tagsearch]').on('click', function () {
 					$element.focus();
 				});
+
+        /**
+         * add focus class to tagsearch element
+         */
+        $element.on('focus', function () {
+          TagSearchCtrl.setFocus();
+          KscCtrl.reset();
+          $scope.$apply();
+        });
+
+        /**
+         * remove focus class on blur
+         */
+        $element.on('blur', function () {
+          TagSearchCtrl.removeFocus();
+          $scope.$apply();
+        });
 				
 				/**
 				 * react to changes in the search text
 				 */
-				$scope.$watch('searchText', function () {
-					// add the current search text as a new tag, if it ends with whitespace
-					var parts = $scope.searchText.match(/(.*)\s$/);
-					if (angular.isArray(parts)) {
-						TagSearchCtrl.addTag(parts[1]);
-						$scope.searchText = '';
-					}
-					setEqualWidth();
-
-          // propagate changes in search text to KscCtrl
-          KscCtrl.setFilterText($scope.searchText);
-				});
+				$scope.$watch('searchText', function (searchtext) {
+          setEqualWidth();
+          KscCtrl.setSearchText(searchtext);
+        });
 				
 				/**
 				 * react on keypress
@@ -496,10 +801,10 @@ angular.module('angular-nsv-tagsearch')
                 $scope.searchText = KscCtrl.getSelection();
                 KscCtrl
                   .reset();
-              } else {
-                TagSearchCtrl.addTag($scope.searchText);
-                $scope.searchText = '';
-              }
+              } 
+
+              TagSearchCtrl.addTag($scope.searchText);
+              $scope.searchText = '';
 							$scope.$apply();
 							break;
 						case 8: // backspace: remove last tag
@@ -511,96 +816,28 @@ angular.module('angular-nsv-tagsearch')
 						// do nothing on default
 					} 
 				});
-			}
-		};
-	}).directive('keyselectContainer', ['$parse', '$filter', function ($parse, $filter) {
-    return {
-      scope : {
-        items : '=' 
-      },
-      controller : ['$scope', '$element', function ($scope, $element) {
-        var selectedIndex = -1,
-            filterText = '',
-            suggestions = [];
 
-        this.reset = function () {
-          selectedIndex = -1;
-          return this;
+        /**
+         * check whether the searchtext contains a tag and add it to the list
+         */
+        $scope.checkInput = function () {
+					// add the current search text as a new tag, if it ends with whitespace
+					var parts = $scope.searchText.match(/(.*)\s$/);
+					if (angular.isArray(parts)) {
+						TagSearchCtrl.addTag(parts[1]);
+            $scope.searchText = '';
+					}
         };
 
-        this.setFilterText = function (newFilterText) {
-          if (filterText !== newFilterText) {
-            filterText = newFilterText;
-            this.updateSuggestions();
-          } 
-          return this;
-        };
-
-        this.updateSuggestions = function () {
-          var l = suggestions.length;
-          suggestions = $filter('filter')($scope.items, filterText);
-          if ((suggestions.length !== l) && (selectedIndex >= suggestions.length)) {
-            selectedIndex = suggestionNumber - 1;
-          }
-        };
-
-        this.getSuggestions = function () {
-          return suggestions;
-        };
-
-        this.getSelectedIndex = function () {
-          return selectedIndex;
-        };
-
-        this.incSelectedIndex = function () {
-          selectedIndex++;
-          if (selectedIndex >= suggestions.length) {
-            selectedIndex = -1;
-          }
-          return this;
-        };
-
-        this.decSelectedIndex = function () {
-          selectedIndex--;
-          if (selectedIndex < -1) {
-            selectedIndex = suggestions.length - 1;
-          }
-          return this;
-        };
-        
-        this.getSelection = function () {
-          return (selectedIndex > -1) ? suggestions[selectedIndex] : null;
-        };
-
-      }]
-    };
-  }])
-  .directive('suggestionList', function() {
-    return {
-      require : '^keyselectContainer',
-      templateUrl : 'views/suggestionListView.html',
-      replace : true,
-			link : function ($scope, $element, $attrs, KscCtrl) {
-
-				$scope.selectedIndex = KscCtrl.getSelectedIndex();
-        $scope.$watch(function () {
-          return KscCtrl.getSelectedIndex();
-        }, function () {
-          $scope.selectedIndex = KscCtrl.getSelectedIndex();
-        }); 
-				
-        KscCtrl.updateSuggestions();
-        $scope.suggestionList = KscCtrl.getSuggestions();
-        $scope.$watch(function () {
-          return KscCtrl.getSuggestions();
-        }, function () {
-          $scope.suggestionList = KscCtrl.getSuggestions();
+        /**
+         * erase the search text when an tag has been added to the list
+         */
+        $scope.$on('taglist-changed-add', function () {
+          $scope.searchText = '';
         });
-
 			}
 		};
 	});
-
 
 angular.module('cabocabo', [
   'cards',
@@ -623,11 +860,11 @@ angular.module('cabocabo').controller('MainCtrl', [
      */
     var watchCard = function (card) {
       deregistrationFns.push($scope.$watch(function () {
-        return angular.isDate(card.mdate) ? card.mdate.valueOf() : 0;
-      }, function () {
-        CardsService.save(card);
-        SearchService.indexText(card.id, card.content);
-      }));
+          return card.content;
+        }, function () {
+          SearchService.indexText(card.id, card.content);
+        })
+      );
     };
     
     /**
@@ -644,33 +881,59 @@ angular.module('cabocabo').controller('MainCtrl', [
       });
     });
   
-    /**
+    /********************************
      * define scope vars
+     ********************************/
+
+    /**
+     * list of cards to show in the deck
+     * @type {array.<Card>}
      */
     $scope.cardList = CardsService.getAll();
-    $scope.searchPhrase = '';
-
-    $scope.allTags = SearchService.getAllTags().toArray();
-    $scope.$watch(SearchService.getAllTags, function () {
-      $scope.allTags = SearchService.getAllTags().toArray();
-    });
 
     /**
-     * define scope functions
+     * the currently selected tags
+     * @type {array.<string>}
      */
+    $scope.selectedTags = [];
+
+    /**
+     * a list with all the available tags 
+     * @type {array.<string>}
+     */
+    $scope.allTags = SearchService.getAllTags().toArray();
+
+    /**
+     * the list of tags may change when the content of the cards changes. we will
+     * update the list of all the tags accordingly
+     */
+    deregistrationFns.push($scope.$watch(SearchService.getAllTags, function (allTags) {
+      $scope.allTags = allTags.toArray();
+    }));
+
+    /********************************
+     * define scope functions
+     ********************************/
 
     /**
      * add a new card to the list
      */
-    $scope.addCard = function () {
-      watchCard(CardsService.add());
+    $scope.addCard = function (card) {
+      CardsService.add(card);
+      watchCard(card);
+      $scope.search();
     };
 
     /**
      * set the search phrase to a certain tag and do a search
+     * 
+     * @param {string} tag
      */
     $scope.searchForTag = function (tag) {
-      $scope.searchPhrase = tag;
+      tag = (''+tag)
+            .replace(/^#/,'')
+            .replace(/ /, '');
+      $scope.selectedTags.push(tag);
       $scope.search();
     };
 
@@ -678,12 +941,8 @@ angular.module('cabocabo').controller('MainCtrl', [
      * do a search for all the tags in the current search phrase
      */
     $scope.search = function () {
-      if (angular.isString($scope.searchPhrase) && $scope.searchPhrase.length > 0) {
-        var tags = $scope.searchPhrase
-                          .toLowerCase()
-                          .replace(/\B#/, '')
-                          .split(' '),
-            ids = SearchService.getIdsForTags(tags);
+      if (angular.isArray($scope.selectedTags) && ($scope.selectedTags.length > 0)) {
+        var ids = SearchService.getIdsForTags($scope.selectedTags);
         $scope.cardList = CardsService.getByIds(ids);
       } else {
         $scope.cardList = CardsService.getAll();

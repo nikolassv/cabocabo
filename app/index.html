@@ -9,19 +9,33 @@
 </head>
 <body ng-controller="MainCtrl">
   <div id="header">Cabocabo</div>
-	<div id="commandbar">
-		<input type="text" class="commandbar-input" 
-      ng-model="searchPhrase" ng-change="search()"/>
-	</div>
-  <tagsearch all-tags="allTags"></tagsearch>
+
+  <tagsearch all-tags="allTags" 
+             selected-tags="selectedTags"
+             on-taglist-change="search()"
+  ></tagsearch>
+
   <div id="desk">
-    <div class="card card-new" ng-click="addCard()">
-      Neue Karte
-    </div>
-    <cc-card ng-repeat="card in cardList track by card.id | orderBy:'cdate':true" 
-    cc-card-model="card" class="card" 
-    linkable-tags on-tag-click="searchForTag(tag)"></cc-card>
+
+    <cc-new-card add-card="addCard(card)"></cc-new-card>
+
+    <cc-card ng-repeat="card in cardList | orderBy:'cdate.valueOf()':true track by card.id " 
+             cc-card-model="card" 
+             class="card" 
+             linkable-tags 
+             on-tag-click="searchForTag(tag)"
+    ></cc-card>
+    
   </div>
+
+  <!-- load svg icons into body -->
+  <script>
+    jQuery(function ($) {
+       $('<div>').load('/img/svg-icons.svg').hide().prependTo('body'); 
+    });
+  </script>
+
+  <!-- Entypo pictograms by Daniel Bruce — www.entypo.com -->
 </body>
 </html>
 

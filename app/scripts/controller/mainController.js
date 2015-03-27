@@ -14,11 +14,11 @@ angular.module('cabocabo').controller('MainCtrl', [
      */
     var watchCard = function (card) {
       deregistrationFns.push($scope.$watch(function () {
-        return angular.isDate(card.mdate) ? card.mdate.valueOf() : 0;
-      }, function () {
-        CardsService.save(card);
-        SearchService.indexText(card.id, card.content);
-      }));
+          return card.content;
+        }, function () {
+          SearchService.indexText(card.id, card.content);
+        })
+      );
     };
     
     /**
@@ -35,33 +35,59 @@ angular.module('cabocabo').controller('MainCtrl', [
       });
     });
   
-    /**
+    /********************************
      * define scope vars
+     ********************************/
+
+    /**
+     * list of cards to show in the deck
+     * @type {array.<Card>}
      */
     $scope.cardList = CardsService.getAll();
-    $scope.searchPhrase = '';
-
-    $scope.allTags = SearchService.getAllTags().toArray();
-    $scope.$watch(SearchService.getAllTags, function () {
-      $scope.allTags = SearchService.getAllTags().toArray();
-    });
 
     /**
-     * define scope functions
+     * the currently selected tags
+     * @type {array.<string>}
      */
+    $scope.selectedTags = [];
+
+    /**
+     * a list with all the available tags 
+     * @type {array.<string>}
+     */
+    $scope.allTags = SearchService.getAllTags().toArray();
+
+    /**
+     * the list of tags may change when the content of the cards changes. we will
+     * update the list of all the tags accordingly
+     */
+    deregistrationFns.push($scope.$watch(SearchService.getAllTags, function (allTags) {
+      $scope.allTags = allTags.toArray();
+    }));
+
+    /********************************
+     * define scope functions
+     ********************************/
 
     /**
      * add a new card to the list
      */
-    $scope.addCard = function () {
-      watchCard(CardsService.add());
+    $scope.addCard = function (card) {
+      CardsService.add(card);
+      watchCard(card);
+      $scope.search();
     };
 
     /**
      * set the search phrase to a certain tag and do a search
+     * 
+     * @param {string} tag
      */
     $scope.searchForTag = function (tag) {
-      $scope.searchPhrase = tag;
+      tag = (''+tag)
+            .replace(/^#/,'')
+            .replace(/ /, '');
+      $scope.selectedTags.push(tag);
       $scope.search();
     };
 
@@ -69,12 +95,8 @@ angular.module('cabocabo').controller('MainCtrl', [
      * do a search for all the tags in the current search phrase
      */
     $scope.search = function () {
-      if (angular.isString($scope.searchPhrase) && $scope.searchPhrase.length > 0) {
-        var tags = $scope.searchPhrase
-                          .toLowerCase()
-                          .replace(/\B#/, '')
-                          .split(' '),
-            ids = SearchService.getIdsForTags(tags);
+      if (angular.isArray($scope.selectedTags) && ($scope.selectedTags.length > 0)) {
+        var ids = SearchService.getIdsForTags($scope.selectedTags);
         $scope.cardList = CardsService.getByIds(ids);
       } else {
         $scope.cardList = CardsService.getAll();

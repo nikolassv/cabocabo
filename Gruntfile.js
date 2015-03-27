@@ -48,21 +48,35 @@ module.exports = function (grunt) {
       dist : {
         files : [
           {src: ['app/index.html'], dest: 'dist/index.html'},
-          {expand: true, cwd: 'app/views/', src: ['*'], dest: 'dist/views/'}
+          {expand: true, cwd: 'app/views/', src: ['*'], dest: 'dist/views/'},
+          {expand: true, cwd: 'app/img/', src: ['*'], dest: 'dist/img/'}
         ]
       }
-    }
+    },
+
+    svgstore : {
+      options : {
+        prefix : 'icon-',
+      },
+      dist : {
+        files : {
+          'dist/img/svg-icons.svg': ['app/img/*.svg'] 
+        } 
+      }
+    } 
   });
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-svgstore');
 
   grunt.registerTask('default', [
     'clean',
     'jshint',
     'concat', 
-    'copy'
+    'copy',
+    'svgstore'
   ]);
 };

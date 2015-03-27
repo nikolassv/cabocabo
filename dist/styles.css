@@ -55,6 +55,7 @@ body {
   padding: 10px;
   font-size: 20px;
   box-shadow: 0px 1px 2px #666;
+  box-sizing: border-box;
 }
 
 #commandbar {
@@ -75,6 +76,24 @@ body {
   width: 95%;
 }
 
+.card-new {
+  margin: 0px auto;
+  display: block;
+  height: 40px;
+  background: #fafafa;
+  width: 10%;
+  border-radius: 3px;
+  padding: 3px;
+  box-shadow: 2px 2px 6px #ccc;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.card-new:hover {
+  opacity: 0.9;
+  box-shadow: 3px 3px 6px #aaa;
+}
+
 .card {
   display:block;
   width: 95%;
@@ -90,17 +109,6 @@ body {
 
 .card:hover {
   box-shadow: 3px 3px 6px #aaa;
-}
-
-.card-new {
-  font-size: 18px;
-  text-align: center;
-  opacity: 0.5;
-  cursor: pointer;
-}
-
-.card-new:hover {
-  opacity: 0.9;
 }
 
 .card-meta {
@@ -164,6 +172,7 @@ body {
   margin: 10px auto;
   max-width: 615px;
   width: 90%;
+  position: relative;
 }
 
 .tagsearch-container {
@@ -172,7 +181,7 @@ body {
 	font-size: 15px;
 	font-family: Helvetica, Arial, sans-serif;
 	display: block;
-	border-radius: 4px;
+	border-radius: 3px;
 	color: #333;
 	padding: 2px;
 	cursor: text;
@@ -192,13 +201,12 @@ body {
 }
 
 .tagsearch-tag-remove {
-	display: inline-block;
-	height: 15px;
-	width: 15px;
-	margin-left: 5px;
+	height: 14px;
+	margin-left: 1px;
+  padding-bottom: 2px;
+  vertical-align: middle;
 	cursor: pointer;
-	border: 1px solid #abc;
-	border-radius: 10px;
+  fill: #67aed1;
 }
 
 .tagsearch-input {
@@ -208,7 +216,7 @@ body {
 	font-size: 13px;
 	outline: none;
 	background-color: transparent;
-	padding: 1px 2px
+	padding: 5px 2px;
 	margin: 2px 3px 2px 0;
 	border-radius: 5px;
 }
@@ -219,15 +227,17 @@ body {
   border-radius: 4px;
   border: 1px solid #999;
   display: inline-block;
-  margin: 1px 7px;
   font-size: 13px;
-  opacity: 0.8;
+  width: 100%;
+  z-index: 10;
+  box-sizing: border-box;
 }
 
 .tagsearch-suggestion {
   display: block;
   list-style-type: none;
   padding: 2px 25px 2px 5px;
+  cursor: pointer;
 }
 
 .tagsearch-selected-suggestion {

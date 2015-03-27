@@ -70,7 +70,16 @@ angular.module('cards').service('CardsService', [
       var newCard = (card instanceof CardModel) ?
                       card :
                       new CardModel(thisService);
-      cards[card.id] = card;
+
+      newCard.setManager(this);
+
+      if (angular.isUndefined(newCard.id)) {
+        newCard.id = this.getNextId();
+      }
+
+      cards[newCard.id] = newCard;
+      this.save();
+
       return newCard;
     };
 
@@ -110,7 +119,7 @@ angular.module('cards').service('CardsService', [
      * @return {CardModel}
      */
     this.createCardFromData = function (cardData) {
-      var newCard = new CardModel(thisService);
+      var newCard = new CardModel();
 
       if (angular.isString(cardData.content)) {
         newCard.content = cardData.content;
@@ -123,6 +132,8 @@ angular.module('cards').service('CardsService', [
       if (angular.isString(cardData.mdate)) {
         newCard.mdate = new Date(cardData.mdate);
       }
+
+      thisService.add(newCard);
 
       return newCard;
     };

@@ -1,12 +1,12 @@
 angular.module('cards').factory('CardModel', function () {
-  function CardModel (manager) {
-    var listenerList =[];
+  function CardModel () {
+    var manager;
 
     /**
      * the id of this card
-     * @type {number}
+     * @type {number|undefined}
      */
-     this.id = manager.getNextId();
+     this.id = undefined;
 
     /**
      * the cards content
@@ -24,7 +24,18 @@ angular.module('cards').factory('CardModel', function () {
      * modification date
      * @type {Date}
      */
-     this.mdate = new Date();
+    this.mdate = new Date();
+
+    /**
+     * sets the manager
+     * 
+     * @param {CardService} new Manager
+     * @return {CardModel}
+     */
+    this.setManager = function (newManager) {
+      manager = newManager;
+      return this;
+    };
 
     /**
      * save this card
@@ -32,7 +43,9 @@ angular.module('cards').factory('CardModel', function () {
      * @return {CardModel}
      */
     this.save = function () {
-      manager.save(this);
+      if (angular.isObject(manager) && angular.isFunction(manager.save)) {
+        manager.save(this);
+      }
       return this;
     };
 
