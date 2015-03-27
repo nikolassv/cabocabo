@@ -1,0 +1,16 @@
+<svg ng-show="currentStatus === STATUS_BUTTON" 
+     class="card-new"
+     ng-click="editNewCard()"
+     data-new-button
+>
+  <use xlink:href="#icon-circle-with-plus"></use>
+</svg>
+
+<cc-card ng-show="currentStatus === STATUS_CARD" 
+         cc-card-model="newCard"
+         on-save="saveCard()"
+         linkable-tags
+         on-tag-click=""
+         class="card"
+         data-card
+></cc-card>
