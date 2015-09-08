@@ -27,7 +27,7 @@
 
     return {
       require : ['^tagsearch', '^keyselectContainer'],
-      templateUrl : 'views/suggestionListView.html',
+      templateUrl : 'views/modules/tagsearch/suggestionListView.html',
       scope : {
         items : '=',
         blacklist : '='

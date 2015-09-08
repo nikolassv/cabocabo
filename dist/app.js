@@ -106,7 +106,7 @@ angular.module('angular-nsv-tagsearch', []);
       card : '=ccCardModel',
       onSave : '&'
     },
-    templateUrl : 'views/cardView.html',
+    templateUrl : 'views/modules/cards/cardView.html',
     transclude : true,
     link : function ($scope, $element) {
       var elEdit = $element.find('.card-editor');
@@ -467,7 +467,7 @@ angular.module('angular-nsv-tagsearch', []);
       scope: {
         addCard: '&'
       },
-      templateUrl: 'views/newCardView.html',
+      templateUrl: 'views/modules/cards/newCardView.html',
       link: function ($scope, $element) {
         var elButton = $element.find('[data-new-button]'),
             elCardEdit = $element.find('[data-card]');
@@ -963,7 +963,7 @@ angular.module('search').filter('tags', [
 
     return {
       require : ['^tagsearch', '^keyselectContainer'],
-      templateUrl : 'views/suggestionListView.html',
+      templateUrl : 'views/modules/tagsearch/suggestionListView.html',
       scope : {
         items : '=',
         blacklist : '='
@@ -1079,7 +1079,7 @@ angular.module('angular-nsv-tagsearch')
 	.directive('tagsearch', function () {
 		return {
 			restrict : 'EA',
-			templateUrl : 'views/tagsearchView.html',
+			templateUrl : 'views/modules/tagsearch/tagsearchView.html',
       scope : {
         allTags : '=',
         selectedTags : '=',

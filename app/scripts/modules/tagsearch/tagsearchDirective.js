@@ -37,7 +37,7 @@ angular.module('angular-nsv-tagsearch')
 	.directive('tagsearch', function () {
 		return {
 			restrict : 'EA',
-			templateUrl : 'views/tagsearchView.html',
+			templateUrl : 'views/modules/tagsearch/tagsearchView.html',
       scope : {
         allTags : '=',
         selectedTags : '=',

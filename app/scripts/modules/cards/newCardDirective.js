@@ -28,7 +28,7 @@
       scope: {
         addCard: '&'
       },
-      templateUrl: 'views/newCardView.html',
+      templateUrl: 'views/modules/cards/newCardView.html',
       link: function ($scope, $element) {
         var elButton = $element.find('[data-new-button]'),
             elCardEdit = $element.find('[data-card]');

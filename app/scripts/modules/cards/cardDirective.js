@@ -28,7 +28,7 @@
       card : '=ccCardModel',
       onSave : '&'
     },
-    templateUrl : 'views/cardView.html',
+    templateUrl : 'views/modules/cards/cardView.html',
     transclude : true,
     link : function ($scope, $element) {
       var elEdit = $element.find('.card-editor');
