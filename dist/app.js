@@ -1,7 +1,50 @@
-angular.module('search', [
-  'angular-nsv-tagmanager'
-]);
-
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+angular.module('search', []);
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 angular.module('cards', [
   'textarea-fit',
   'LocalStorageModule',
@@ -9,9 +52,54 @@ angular.module('cards', [
   'search'
 ]);
 
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 angular.module('angular-nsv-tagsearch', []);
-
-angular.module('cards').directive('ccCard', function () {
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('cards').directive('ccCard', function () {
   return {
     restrict : 'E',
     scope : {
@@ -22,12 +110,18 @@ angular.module('cards').directive('ccCard', function () {
     transclude : true,
     link : function ($scope, $element) {
       var elEdit = $element.find('.card-editor');
-      
-      $element.on('click', function () {
+
+      $scope.deleteCard = function () {
+        $element.fadeOut(function () {
+          $scope.card.remove();
+        });
+      };
+
+      $scope.toggleEditor = function () {
         $element.addClass('edit');
         elEdit.focus();
         return false;
-      });
+      };
 
       elEdit.on('focusout', function () {
         $element.removeClass('edit');
@@ -40,7 +134,30 @@ angular.module('cards').directive('ccCard', function () {
   };
 });
 
-angular.module('cards').factory('CardModel', function () {
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('cards').factory('CardModel', function () {
   function CardModel () {
     var manager;
 
@@ -92,6 +209,20 @@ angular.module('cards').factory('CardModel', function () {
     };
 
     /**
+     * remove this card from the collection
+     *
+     * @return {CardModel}
+     */
+    this.remove = function () {
+      if (angular.isObject(manager) && angular.isFunction(manager.remove)) {
+        manager.remove(this);
+      }
+      this.content = ''; // deleting the content will unregister the card from the tag search
+      this.setModificationDate();
+      return this;
+    };
+
+    /**
      * sets the modification date for a card
      *
      * if the parameter is a date it will be set as the new modification date.
@@ -113,7 +244,30 @@ angular.module('cards').factory('CardModel', function () {
   return CardModel;
 });
 
-angular.module('cards').service('CardsService', [
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('cards').service('CardsService', [
   '$window', '$rootScope', 'CardModel', 'localStorageService',
   function ($window, $rootScope, CardModel, LocalStorageService) {
     var
@@ -140,9 +294,9 @@ angular.module('cards').service('CardsService', [
         // reference to this service
         thisService = this;
 
-    var saveToLocalStorage = function () {
+    function saveToLocalStorage () {
       LocalStorageService.set(LS_ALL_CARDS, thisService.getAll());
-    };
+    }
 
     /**
      * return all cards for this user
@@ -179,12 +333,13 @@ angular.module('cards').service('CardsService', [
     /**
      * add a card
      *
+     * @param {CardModel}
      * @return {CardModel}
      */
     this.add = function (card) {
       var newCard = (card instanceof CardModel) ?
                       card :
-                      new CardModel(thisService);
+                      new CardModel();
 
       newCard.setManager(this);
 
@@ -199,15 +354,26 @@ angular.module('cards').service('CardsService', [
     };
 
     /**
-     * save a card to the localstorage
+     * save cards to the localstorage
      *
      * (in lack of saving method for individual card, we will save all the cards
      *   at once)
      *
+     * @return this
+     */
+    this.save = function () {
+      saveToLocalStorage();
+      return this;
+    };
+
+    /**
+     * remove a card from the collection
+     *
      * @param {CardModel}
      * @return this
      */
-    this.save = function (card) {
+    this.remove = function (card) {
+      delete cards[card.id];
       saveToLocalStorage();
       return this;
     };
@@ -271,7 +437,30 @@ angular.module('cards').service('CardsService', [
   }
 ]);
 
-angular.module('cards')
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('cards')
   .directive('ccNewCard', ['$timeout', 'CardModel', function ($timeout, CardModel) {
     return {
       restrict: 'E',
@@ -295,8 +484,9 @@ angular.module('cards')
          */
         $scope.editNewCard = function () {
           $scope.currentStatus = $scope.STATUS_CARD;
-          $timeout(function () {
-            elCardEdit.trigger('click');
+          $timeout(function () {            
+            elCardEdit.addClass('edit');
+            elCardEdit.find('.card-editor').focus();
           });
         };
 
@@ -316,6 +506,114 @@ angular.module('cards')
     };
   }]);
 
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ /**
+ * directive: containsTags
+ *
+ * this directive finds tags in an elements inner html. It marks them and adds an
+ * event handler on each tags.
+ *
+ * this directive requires an linkableTags controller on any parent element. if any
+ * of the tags in the current element is clicked, it invokes the linkableTags
+ * controllers `onClick` method
+ */
+angular.module('search')
+  .directive('containsTags', ['$filter', function ($filter) {
+    var tagFilter = $filter('tags');
+    return {
+      require : '^linkableTags',
+      link : function ($scope, $element, $attrs, $LnTagsCtrl) {
+        /**
+         * the inner html of the element to prevent duplicate handling of tags
+         */
+        var lastSeenHtml = '';
+
+        /**
+         * marks all the tags in the elements html a
+         */
+        var addTags = function () {
+          $element.html(tagFilter($element.html()));
+
+          $element.find('tag').on('click', function (evt) {
+            $LnTagsCtrl.onClick($(this).data('tag'));
+            $scope.$apply();
+            return false; // stop propagation and prevent default
+          });
+
+          lastSeenHtml = $element.html();
+        };
+
+        /**
+         * listen to changes in the elements html
+         */
+        $scope.$watch(function () {
+          return $element.html();
+        }, function (currentHtml) {
+          /**
+           * add tags only if the html has changed since we added the tags the last
+           * time
+           */
+          if (currentHtml !== lastSeenHtml) {
+            addTags();
+          }
+        });
+      }
+    };
+  }]);
+
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ /**
+ * directive: linkable tags
+ *
+ * this directive adds a controller to an element that provides an onClick method
+ * only. It is intended to be uses with the `containsTags` directive. The
+ * `containsTags` directive marks tags in an elements html and invokes this
+ * controllers `onClick` method whenever one of the tags is clicked.
+ */
 angular.module('search').directive('linkableTags', [
   '$filter', '$parse', 'search.TagService',
   function ($filter, $parse, TagService) {
@@ -330,97 +628,134 @@ angular.module('search').directive('linkableTags', [
   }
 ]);
 
-angular.module('search').service('search.SearchService', [
- 'angular-nsv-tagmanager.TagIndex', 'angular-nsv-tagmanager.Set', 'search.TagService',
- function (Tagmanager, Set, TagService) {
-  /**
-   * local reference to this service
-   */
-  var thisService = this;
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('search').service('search.SearchService', [
+  'search.TagService',
+  function (TagService) {
+    /**
+     * local reference to this service
+     */
+    var thisService = this;
 
-  /**
-   * the index for all the texts
-   * @type {angular-nsv-tagmanager.TagIndex}
-   */
-  var tagIndex = new Tagmanager();
+    var reversedIndex = {};
 
-  /**
-   * save the tags for a given text
-   *
-   * @param {number}
-   * @param {string}
-   * @return {SearchService}
-   */
-  this.indexText = function (id, text) {
-    var tags = TagService.extractTagsFromText(text);
-    tagIndex.setTagsForItem(id, tags); 
-    return this;
-  };
+    /**
+     * save the tags for a given text
+     *
+     * @param {number}
+     * @param {string}
+     * @return {SearchService}
+     */
+    this.indexText = function (id, text) {
+      angular.forEach(TagService.extractTagsFromText(text), function (tag) {
+        if (_.has(reversedIndex, tag) && angular.isArray(reversedIndex[tag])) {
+          if (!_.includes(reversedIndex[tag], id)) {
+            reversedIndex[tag].push(id);
+          }
+        } else {
+          reversedIndex[tag] = [id];
+        }
+      });
+      return this;
+    };
 
-  /**
-   * get the ids for a given tag from the index
-   *
-   * @param {string}
-   * @return {Array.<number>}
-   */
-  this.getIdsForTag = function (tag) {
-    tag = tag.toLowerCase();
-    return tagIndex.getItemsForTag(tag).toArray();
-  };
+    /**
+     * get the ids for a given tag from the index
+     *
+     * @param {string}
+     * @return {array.<number>}
+     */
+    this.getIdsForTag = function (tag) {
+      return angular.isArray(reversedIndex[tag]) ? reversedIndex[tag] : [];
+    };
 
-  /**
-   * get the ids that match all of the tags in the array
-   */
-  this.getIdsForTags = function (tags) {
-    var ids;
-    angular.forEach(tags, function (tag) {
-      tag = tag.toLowerCase();
-      if (ids instanceof Set) {
-        ids = ids.intersect(thisService.getIdsForTag(tag));
-      } else {
-        ids = thisService.getIdsForTag(tag);
-      }
-    });
-    return ids;
-  };
+    /**
+     * get the ids that match all of the tags in the array
+     *
+     * @param {array.<string>}
+     * @return {array.<number>}
+     */
+    this.getIdsForTags = function (tags) {
+      var ids;
 
-  /**
-   * return all existing tags
-   */
-  this.getAllTags = function () {
-    return tagIndex.getAllTags();
-  };
- }
+      angular.forEach(tags, function (tag) {
+
+        tag = tag.toLowerCase();
+
+        if (angular.isArray(ids)) {
+          ids = _.intersection(ids, thisService.getIdsForTag(tag));
+        } else {
+          ids = thisService.getIdsForTag(tag);
+        }
+
+      });
+
+      return ids;
+    };
+
+    /**
+     * return all existing tags
+     *
+     * @return {array.<string>}
+     */
+    this.getAllTags = function () {
+      return _.keys(reversedIndex);
+    };
+  }
 ]);
 
-angular.module('search')
-  .directive('containsTags', ['$filter', function ($filter) {
-    var tagFilter = $filter('tags');
-    return {
-      require : '^linkableTags',
-      link : function ($scope, $element, $attrs, $LnTagsCtrl) {
-        var addTags = function () {
-          $element.html(tagFilter($element.text()));
-          $element.find('tag').on('click', function (evt) {
-            $LnTagsCtrl.onClick($(this).data('tag'));
-            evt.stopPropagation();
-            evt.preventDefault();
-            $scope.$apply();
-          });
-        };
-        var deregistrationFn = $scope.$watch(function () {
-          return $element.text();
-        }, function () {
-          addTags();
-        });
-        $scope.$on('$destroy', deregistrationFn);
-      }
-    };
-  }]);
-
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ /**
+ * service: tagService
+ * 
+ * a service to handle tags
+ */
 angular.module('search').service('search.TagService', [
-  'angular-nsv-tagmanager.Set',
-  function (Set) {
+  function () {
 
     /**
      * regex to recognize tags in a text
@@ -432,19 +767,52 @@ angular.module('search').service('search.TagService', [
      * extract tags from a text
      *
      * @param {string} text
-     * @return {Set}
+     * @return {array.<string>}
      */
     this.extractTagsFromText = function (text) {
-      var rawTags = text.match(this.tagRegEx),
-          tags = new Set();
+      var rawTags = text.match(this.tagRegEx);
+      var tags = [];
+
       angular.forEach(rawTags, function(rT) {
-        tags.insert(rT.slice(1).toLowerCase());
+        rT = rT.slice(1).toLowerCase();
+        if (!_.includes(tags, rT)) {
+          tags.push(rT);
+        }
       });
+      
       return tags;
     };
   }
 ]);
 
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ /**
+ * filter: tags
+ *
+ * a filter that surrounds all tags in a text with tag elements
+ */
 angular.module('search').filter('tags', [
   'search.TagService',
   function (TagService) {
@@ -454,7 +822,30 @@ angular.module('search').filter('tags', [
   }
 ]);
 
-angular.module('angular-nsv-tagsearch')
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('angular-nsv-tagsearch')
   .directive('keyselectContainer', ['$parse', '$filter', function ($parse, $filter) {
 
     return {
@@ -543,7 +934,30 @@ angular.module('angular-nsv-tagsearch')
     };
   }]);
 
-angular.module('angular-nsv-tagsearch')
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('angular-nsv-tagsearch')
   .directive('suggestionList', ['$filter', function($filter) {
     var filterFilter = $filter('filter');
 
@@ -626,6 +1040,41 @@ angular.module('angular-nsv-tagsearch')
 		};
 	}]);
 
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ /**
+ * directive: tagsearch
+ *
+ * a directive that shows a text input for tags. It takes three parameters:
+
+ * @param {array.<string>} allTags a list of all tags that are currently used in the system. the user may
+ *    enter other tags too, but the tags in the allTags parameter are shown in a
+ *    suggest box under the input field.
+ * @param {array.<string>} selectedTags a list of all the tags currently selected by the user.
+ * @param {function} onTagListChange function that will be invoked whenever the list
+ *    of selected tags change.
+ */
 angular.module('angular-nsv-tagsearch')
 	.directive('tagsearch', function () {
 		return {
@@ -712,7 +1161,30 @@ angular.module('angular-nsv-tagsearch')
 		};
 	});
 
-angular.module('angular-nsv-tagsearch')
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('angular-nsv-tagsearch')
 	.directive('tagsearchInput', function () {
 		var widthDefiningStyles = [ 'font-size', 'font-family', 'margin', 'padding', 'min-width' ],
 
@@ -839,47 +1311,81 @@ angular.module('angular-nsv-tagsearch')
 		};
 	});
 
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 angular.module('cabocabo', [
   'cards',
   'angular-nsv-tagsearch'
 ]);
 
-angular.module('cabocabo').controller('MainCtrl', [
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('cabocabo').controller('MainCtrl', [
   '$log', '$scope', 'CardsService', 'search.SearchService',
   function ($log, $scope, CardsService, SearchService) {
     /**
-     * deregistration functions
-     * @type {Array.<function>}
-     */
-    var deregistrationFns = [];
-
-    /**
-     * watch a card by its modification date and save derigistration functions
+     * watch a card and save derigistration function
      *
      * @param {CardModel}
      */
-    var watchCard = function (card) {
-      deregistrationFns.push($scope.$watch(function () {
+    function watchCard (card) {
+      $scope.$watch(
+        function () {
           return card.content;
-        }, function () {
+        },
+        function () {
           SearchService.indexText(card.id, card.content);
-        })
+          $scope.search();
+        }
       );
-    };
+    }
     
     /**
      * watch all existing cards
      */
-    angular.forEach(CardsService.getAll(), watchCard );
-
-    /**
-     * deregister all watches when scope is destroyed
-     */
-    $scope.$on('$destroy', function () {
-      angular.forEach(deregistrationFns, function (dfn) {
-        dfn();
-      });
-    });
+    angular.forEach(CardsService.getAll(), watchCard);
   
     /********************************
      * define scope vars
@@ -901,15 +1407,17 @@ angular.module('cabocabo').controller('MainCtrl', [
      * a list with all the available tags 
      * @type {array.<string>}
      */
-    $scope.allTags = SearchService.getAllTags().toArray();
+    $scope.allTags = SearchService.getAllTags();
 
     /**
      * the list of tags may change when the content of the cards changes. we will
      * update the list of all the tags accordingly
      */
-    deregistrationFns.push($scope.$watch(SearchService.getAllTags, function (allTags) {
-      $scope.allTags = allTags.toArray();
-    }));
+    $scope.$watch(function () {
+      return SearchService.getAllTags().length;
+    }, function () {
+      $scope.allTags = SearchService.getAllTags();
+    });
 
     /********************************
      * define scope functions

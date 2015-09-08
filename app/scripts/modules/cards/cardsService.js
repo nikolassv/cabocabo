@@ -1,4 +1,27 @@
-angular.module('cards').service('CardsService', [
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('cards').service('CardsService', [
   '$window', '$rootScope', 'CardModel', 'localStorageService',
   function ($window, $rootScope, CardModel, LocalStorageService) {
     var
@@ -25,9 +48,9 @@ angular.module('cards').service('CardsService', [
         // reference to this service
         thisService = this;
 
-    var saveToLocalStorage = function () {
+    function saveToLocalStorage () {
       LocalStorageService.set(LS_ALL_CARDS, thisService.getAll());
-    };
+    }
 
     /**
      * return all cards for this user
@@ -64,12 +87,13 @@ angular.module('cards').service('CardsService', [
     /**
      * add a card
      *
+     * @param {CardModel}
      * @return {CardModel}
      */
     this.add = function (card) {
       var newCard = (card instanceof CardModel) ?
                       card :
-                      new CardModel(thisService);
+                      new CardModel();
 
       newCard.setManager(this);
 
@@ -84,15 +108,26 @@ angular.module('cards').service('CardsService', [
     };
 
     /**
-     * save a card to the localstorage
+     * save cards to the localstorage
      *
      * (in lack of saving method for individual card, we will save all the cards
      *   at once)
      *
+     * @return this
+     */
+    this.save = function () {
+      saveToLocalStorage();
+      return this;
+    };
+
+    /**
+     * remove a card from the collection
+     *
      * @param {CardModel}
      * @return this
      */
-    this.save = function (card) {
+    this.remove = function (card) {
+      delete cards[card.id];
       saveToLocalStorage();
       return this;
     };

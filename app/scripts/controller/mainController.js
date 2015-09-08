@@ -1,39 +1,50 @@
-angular.module('cabocabo').controller('MainCtrl', [
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ angular.module('cabocabo').controller('MainCtrl', [
   '$log', '$scope', 'CardsService', 'search.SearchService',
   function ($log, $scope, CardsService, SearchService) {
     /**
-     * deregistration functions
-     * @type {Array.<function>}
-     */
-    var deregistrationFns = [];
-
-    /**
-     * watch a card by its modification date and save derigistration functions
+     * watch a card and save derigistration function
      *
      * @param {CardModel}
      */
-    var watchCard = function (card) {
-      deregistrationFns.push($scope.$watch(function () {
+    function watchCard (card) {
+      $scope.$watch(
+        function () {
           return card.content;
-        }, function () {
+        },
+        function () {
           SearchService.indexText(card.id, card.content);
-        })
+          $scope.search();
+        }
       );
-    };
+    }
     
     /**
      * watch all existing cards
      */
-    angular.forEach(CardsService.getAll(), watchCard );
-
-    /**
-     * deregister all watches when scope is destroyed
-     */
-    $scope.$on('$destroy', function () {
-      angular.forEach(deregistrationFns, function (dfn) {
-        dfn();
-      });
-    });
+    angular.forEach(CardsService.getAll(), watchCard);
   
     /********************************
      * define scope vars
@@ -55,15 +66,17 @@ angular.module('cabocabo').controller('MainCtrl', [
      * a list with all the available tags 
      * @type {array.<string>}
      */
-    $scope.allTags = SearchService.getAllTags().toArray();
+    $scope.allTags = SearchService.getAllTags();
 
     /**
      * the list of tags may change when the content of the cards changes. we will
      * update the list of all the tags accordingly
      */
-    deregistrationFns.push($scope.$watch(SearchService.getAllTags, function (allTags) {
-      $scope.allTags = allTags.toArray();
-    }));
+    $scope.$watch(function () {
+      return SearchService.getAllTags().length;
+    }, function () {
+      $scope.allTags = SearchService.getAllTags();
+    });
 
     /********************************
      * define scope functions
