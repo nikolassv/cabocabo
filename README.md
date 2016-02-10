@@ -6,7 +6,7 @@ This application is still under construction and should not be used for importan
 
 ## Install and build
 
-To install cabocabo create a local clone of this repository. Invoke `npm install` and `bower install` to get your development system ready and build the app by invoking the `grunt` command. To use the app open `dist/index.html` in your browser.
+To install cabocabo create a local clone of this repository. Invoke `npm install` and `bower install` to get your development system ready and build the app by invoking the `grunt` command. To use the app open `http://localhost:9000/index.html` in your browser.
 
 ## Usage
 

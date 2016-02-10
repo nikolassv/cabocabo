@@ -86,7 +86,16 @@ module.exports = function (grunt) {
           'dist/img/svg-icons.svg': ['app/img/*.svg'] 
         } 
       }
-    } 
+    },
+    
+    serve : {
+      options: {
+        port: 9000,
+		serve: {
+			path: 'dist/'
+		}
+      }
+    }  
   });
 
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -94,12 +103,18 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-svgstore');
+  grunt.loadNpmTasks('grunt-serve');
 
-  grunt.registerTask('default', [
+  grunt.registerTask('build', [
     'clean',
     'jshint',
     'concat', 
     'copy',
     'svgstore'
   ]);
+  
+  grunt.registerTask('default', [
+	'build',
+	'serve'
+]);
 };
