@@ -40,11 +40,12 @@ module.exports = function (grunt) {
             'app/styles/tagsearch.css'
           ],
           'dist/lib.js' : [
-            'lib/jquery/dist/jquery.min.js',
-            'lib/angular/angular.min.js',
-            'lib/lodash/lodash.min.js',
+            'lib/jquery/dist/jquery.js',
+            'lib/angular/angular.js',
+            'lib/angular-route/angular-route.js',
+            'lib/lodash/lodash.js',
             'lib/angular-textarea-fit/angular-textarea-fit.js',
-            'lib/angular-local-storage/angular-local-storage.min.js',
+            'lib/angular-local-storage/angular-local-storage.js',
             'lib/angular-nsv-stringformat/stringformat.js'
           ],
           'dist/app.js' : [
@@ -58,8 +59,9 @@ module.exports = function (grunt) {
             'app/scripts/modules/cardsModule.js',
             'app/scripts/modules/tagsearchModule.js',
             
-            'app/scripts/modules/**/*.js',   // module assets
-            'app/scripts/main.js',        // application module definition
+            'app/scripts/modules/**/*.js', // module assets
+            'app/scripts/main.js', // application module definition
+            'app/scripts/routes.js',
             'app/scripts/controller/**/*.js', // controller
             '!app/scripts/**/tests/*.js' // do not include tests
           ]
@@ -91,9 +93,9 @@ module.exports = function (grunt) {
     serve : {
       options: {
         port: 9000,
-		serve: {
-			path: 'dist/'
-		}
+        serve: {
+          path: 'dist/'
+        }
       }
     }  
   });
@@ -114,7 +116,7 @@ module.exports = function (grunt) {
   ]);
   
   grunt.registerTask('default', [
-	'build',
-	'serve'
+  'build',
+  'serve'
 ]);
 };

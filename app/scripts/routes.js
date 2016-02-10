@@ -21,22 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- describe('search module: ', function () {
-  var TagService;
-  
-  beforeEach(module('search'));
-
-  beforeEach(inject(['search.TagService', function(__TagService__) {
-    TagService = __TagService__;
-  }]));
-
-  describe('the search service', function () {
-    it('should extract tags from text', function () {
-      var tags = TagService.extractTagsFromText('dies ist #ein #text.#mit tags.');
-      expect(tags.length).toEqual(3);
-      expect(tags).toContain('ein');
-      expect(tags).toContain('text');
-      expect(tags).not.toContain('dies');
-    });
-  });
-});
+ angular.module('cabocabo').config([
+  '$routeProvider',
+  function ($routeProvider) {
+    $routeProvider
+      .when('/', {
+          controller: 'MainCtrl',
+          templateUrl: 'views/controller/mainView.html'
+      });
+  }
+]);

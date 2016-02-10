@@ -26,33 +26,18 @@
 <!DOCTYPE HTML>
 <html lang="en" ng-app="cabocabo">
 <head>
-	<meta charset="UTF-8">
-	<title>Cabocabo</title>
+  <meta charset="UTF-8">
+  <title>Cabocabo</title>
+
   <script type="text/javascript" src="lib.js"></script>
   <script type="text/javascript" src="app.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body ng-controller="MainCtrl">
+<body>
   <div id="header">Cabocabo</div>
-
-  <tagsearch all-tags="allTags" 
-             selected-tags="selectedTags"
-             on-taglist-change="search()"
-  ></tagsearch>
-
-  <div id="desk">
-
-    <cc-new-card add-card="addCard(card)"></cc-new-card>
-
-    <cc-card ng-repeat="card in cardList | orderBy:'cdate.valueOf()':true track by card.id " 
-             cc-card-model="card" 
-             class="card" 
-             linkable-tags 
-             on-tag-click="searchForTag(tag)"
-    ></cc-card>
-    
-  </div>
-
+  
+  <ng-view></ng-view>
+  
   <!-- load svg icons into body -->
   <script>
     jQuery(function ($) {

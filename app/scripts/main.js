@@ -22,6 +22,7 @@
  * THE SOFTWARE.
  */
 angular.module('cabocabo', [
+  'ngRoute',
   'cards',
   'angular-nsv-tagsearch'
 ]);

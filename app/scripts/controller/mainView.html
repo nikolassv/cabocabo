@@ -1,0 +1,15 @@
+<tagsearch all-tags="allTags" 
+         selected-tags="selectedTags"
+         on-taglist-change="search()"
+></tagsearch>
+
+<div id="desk">
+    <cc-new-card add-card="addCard(card)"></cc-new-card>
+    
+    <cc-card ng-repeat="card in cardList | orderBy:'cdate.valueOf()':true track by card.id " 
+             cc-card-model="card" 
+             class="card" 
+             linkable-tags 
+             on-tag-click="searchForTag(tag)"
+    ></cc-card>
+</div>
