@@ -24,13 +24,22 @@
 module.exports = function (grunt) {
   grunt.initConfig({
     clean : {
-      dist : ['dist/']
+      dist : 'dist/'
     },
+
     jshint : {
       dist : {
-        src : ['app/scripts/**/*.js']
+        src : 'app/scripts/**/*.js'
       }
     },
+
+    jscs: {
+      src: 'app/scripts/**/*.js',
+      options: {
+        config: '.jscsrc'
+      }
+    },
+
     concat : {
       dist : {
         files : {
@@ -92,7 +101,7 @@ module.exports = function (grunt) {
     
     serve : {
       options: {
-        port: 9000,
+        port: 9090,
         serve: {
           path: 'dist/'
         }
@@ -106,9 +115,11 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-svgstore');
   grunt.loadNpmTasks('grunt-serve');
+  grunt.loadNpmTasks('grunt-jscs');
 
   grunt.registerTask('build', [
     'clean',
+    'jscs',
     'jshint',
     'concat', 
     'copy',

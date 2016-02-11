@@ -2,17 +2,17 @@
  * The MIT License
  *
  * Copyright (c) 2015 Nikolas Schmidt-Voigt, http://nikolassv.de
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,14 +22,14 @@
  * THE SOFTWARE.
  */
  angular.module('cards').factory('CardModel', function () {
-  function CardModel () {
+  function CardModel() {
     var manager;
 
     /**
      * the id of this card
      * @type {number|undefined}
      */
-     this.id = undefined;
+    this.id = undefined;
 
     /**
      * the cards content
@@ -51,7 +51,7 @@
 
     /**
      * sets the manager
-     * 
+     *
      * @param {CardService} new Manager
      * @return {CardModel}
      */
@@ -69,6 +69,7 @@
       if (angular.isObject(manager) && angular.isFunction(manager.save)) {
         manager.save(this);
       }
+
       return this;
     };
 
@@ -81,6 +82,7 @@
       if (angular.isObject(manager) && angular.isFunction(manager.remove)) {
         manager.remove(this);
       }
+
       this.content = ''; // deleting the content will unregister the card from the tag search
       this.setModificationDate();
       return this;
@@ -101,6 +103,7 @@
       } else {
         this.mdate = new Date();
       }
+
       return this;
     };
   }
