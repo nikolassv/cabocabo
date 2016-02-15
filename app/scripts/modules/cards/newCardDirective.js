@@ -30,23 +30,18 @@
       },
       templateUrl: 'views/modules/cards/newCardView.html',
       link: function ($scope, $element) {
-        var elButton = $element.find('[data-new-button]'),
-            elCardEdit = $element.find('[data-card]');
+        var elCardEdit = $element.find('[data-card]');
 
-        $scope.STATUS_BUTTON = 1;
-        $scope.STATUS_CARD = 2;
-
-        $scope.currentStatus = $scope.STATUS_BUTTON;
+        $scope.editNewCard = false;
 
         $scope.newCard = new CardModel();
 
         /**
          * show the new card and let the user edit it
          */
-        $scope.editNewCard = function () {
-          $scope.currentStatus = $scope.STATUS_CARD;
-          $timeout(function () {
-            elCardEdit.addClass('edit');
+        $scope.activateEditor = function() {
+          $scope.editNewCard = true;
+          $timeout(function() {
             elCardEdit.find('.card-editor').focus();
           });
         };
@@ -61,8 +56,8 @@
             $scope.newCard = new CardModel();
           }
 
-          $scope.currentStatus = $scope.STATUS_BUTTON;
+          $scope.editNewCard = false;
         };
-      },
+      }
     };
-  },]);
+  }]);

@@ -73,7 +73,6 @@
       var ids = null;
 
       angular.forEach(tags, function (tag) {
-
         tag = tag.toLowerCase();
 
         if (angular.isArray(ids)) {
@@ -81,7 +80,6 @@
         } else {
           ids = thisService.getIdsForTag(tag);
         }
-
       });
 
       return ids;

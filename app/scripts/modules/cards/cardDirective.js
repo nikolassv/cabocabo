@@ -21,37 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- angular.module('cards').directive('ccCard', function () {
-  return {
-    restrict: 'E',
-    scope: {
-      card: '=ccCardModel',
-      onSave: '&',
-    },
-    templateUrl: 'views/modules/cards/cardView.html',
-    transclude: true,
-    link: function ($scope, $element) {
-      var elEdit = $element.find('.card-editor');
+angular.module('cards').directive('ccCard', [
+  '$timeout',
+  function ($timeout) {
+    return {
+      restrict: 'E',
+      scope: {
+        card: '=ccCardModel',
+        isEditModeActive: '=?',
+        onSave: '&',
+      },
+      templateUrl: 'views/modules/cards/cardView.html',
+      transclude: true,
+      link: function ($scope, $element) {
+        var elEdit = $element.find('.card-editor');
 
-      $scope.deleteCard = function () {
-        $element.fadeOut(function () {
-          $scope.card.remove();
+        $scope.isEditModeActive = _.get($scope, 'isEditModeActive', false);
+
+        $scope.deleteCard = function () {
+          $element.fadeOut(function () {
+            $scope.card.remove();
+          });
+        };
+
+        $scope.activateEditor = function () {
+          $scope.isEditModeActive = true;
+          $timeout(elEdit.focus.bind(elEdit));
+          return false;
+        };
+
+        elEdit.on('focusout', saveAndStopEditing);
+
+        elEdit.on('keydown', function (evt) {
+          if (evt.ctrlKey && evt.keyCode === 13) {
+            saveAndStopEditing();
+          }
         });
-      };
 
-      $scope.toggleEditor = function () {
-        $element.addClass('edit');
-        elEdit.focus();
-        return false;
-      };
-
-      elEdit.on('focusout', function () {
-        $element.removeClass('edit');
-        $scope.card.setModificationDate();
-        $scope.card.save();
-        $scope.onSave($scope.card);
-        $scope.$apply();
-      });
-    },
-  };
-});
+        function saveAndStopEditing() {
+          $scope.isEditModeActive = false;
+          $scope.card.setModificationDate();
+          $scope.card.save();
+          $scope.onSave($scope.card);
+          $scope.$apply();
+        }
+      }
+    };
+  }]);

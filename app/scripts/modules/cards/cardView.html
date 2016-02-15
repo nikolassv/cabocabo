@@ -23,24 +23,31 @@
  * THE SOFTWARE.
  */
 -->
-<div class="card-meta">
-  {{card.cdate | date}}
-</div>
-
-<svg class="card-delete"
-     ng-click="deleteCard()"
+<div
+        class="card"
+        ng-class="{edit: isEditModeActive}"
 >
-  <use xlink:href="#icon-trash"></use>
-</svg>
+    <div class="card-meta">
+        {{card.cdate | date}}
+    </div>
 
-<div class="card-body" 
-     ng-bind-html="card.content | sanitizeTags | paragraphs:{'class':'card-body-text'} | newlines | linkUrls:{'target' : '_blank'} | trustAsHtml"
-     ng-click="toggleEditor()"
-     contains-tags
-></div>
+    <svg class="card-delete"
+         ng-click="deleteCard()"
+    >
+        <use xlink:href="#icon-trash"></use>
+    </svg>
 
-<textarea class="card-editor" 
-          ng-model="card.content" 
-          ng-trim="0"
-          textarea-fit
-></textarea>
+    <div class="card-body"
+         ng-bind-html="card.content | sanitizeTags | paragraphs:{'class':'card-body-text'} | newlines | linkUrls:{'target' : '_blank'} | trustAsHtml"
+         ng-click="activateEditor()"
+         contains-tags
+         ng-if="!isEditModeActive"
+    ></div>
+
+    <textarea class="card-editor"
+              ng-model="card.content"
+              ng-trim="0"
+              textarea-fit
+              ng-show="isEditModeActive"
+    ></textarea>
+</div>

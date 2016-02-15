@@ -22,7 +22,6 @@
  * THE SOFTWARE.
  */
 body {
-  background-color: #D3DBD9;
   font-family: Helvetica, sans-serif;
   line-height: 1.4;
 }
@@ -32,7 +31,8 @@ body {
   color: #D3DBD9;
   width: 100%;
   padding: 10px;
-  font-size: 20px;
+  font-size: 1.4em;
+  font-weight: bold;
   box-shadow: 0px 1px 2px #666;
   box-sizing: border-box;
 }
@@ -58,12 +58,12 @@ body {
 .card-new {
   margin: 0px auto;
   display: block;
-  height: 40px;
-  background: #fafafa;
-  width: 10%;
+  height: 2em;
+  background: #eaeaea;
+  width: 11em;
+  border: 1px solid #999;
   border-radius: 3px;
   padding: 3px;
-  box-shadow: 2px 2px 6px #ccc;
   opacity: 0.7;
   cursor: pointer;
 }
@@ -73,28 +73,24 @@ body {
   box-shadow: 3px 3px 6px #aaa;
 }
 
+.card-new-editor {
+  display: block;
+  margin: 0px auto;
+}
+
 .card {
   position: relative;
-  display:block;
-  width: 95%;
-  max-width: 450px;
+  display: block;
   padding: 20px;
-  margin: 15px auto;
-  background-color: #fafafa;
-  border-radius: 3px;
-  box-shadow: 2px 2px 6px #ccc;
-  font-size: 14px;
+  margin: 15px 15px;
   font-family: Helvetica, Arial, sans-serif;
 }
 
-.card:hover {
-  box-shadow: 3px 3px 6px #aaa;
-}
-
 .card-meta {
-  font-size: 10px;
+  font-size: 0.7em;
   color: #666666;
   margin-bottom: 5px;
+  border-bottom: 1px solid #256F5C
 }
 
 .card-delete {
@@ -104,10 +100,10 @@ body {
 .card:hover .card-delete {
   display: block;
   position: absolute;
-  top: 10px;
-  right: 10px;
-  height: 20px;
-  width: 20px;
+  top: 1.3em;
+  right: 1.1em;
+  height: 0.8em;
+  width: 1em;
   cursor: pointer;
   opacity: 0.3;
 }
@@ -121,7 +117,7 @@ body {
 }
 
 .card-body tag,
-.tag{
+.tag {
   display: inline-block;
   border: 1px solid #67AED1;
   background-color: #F3FBFE;
@@ -132,23 +128,11 @@ body {
   font-size: 13px;
 }
 
-.card.edit .card-body {
-  display: none;
-}
-
-.card-editor {
-  display: none;
-}
-
-.edit .card-editor {
-  display: block;
-}
-
 .card-body,
 .card-editor {
   width: 100%;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   background-color: inherit;
   line-height: inherit;
   min-height: 50px;

@@ -111,7 +111,10 @@
     angular.forEach(CardsService.getAll(), indexCard);
 
     if (angular.isString($routeParams.tags)) {
-      $scope.selectedTags = _.uniq($routeParams.tags.split(' '));
+      $scope.selectedTags = _($routeParams.tags.split(' '))
+                              .uniq()
+                              .filter(_.negate(_.isEmpty))
+                              .value();
     }
 
     $scope.search();
