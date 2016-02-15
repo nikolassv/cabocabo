@@ -29,16 +29,14 @@
  * `containsTags` directive marks tags in an elements html and invokes this
  * controllers `onClick` method whenever one of the tags is clicked.
  */
-angular.module('search').directive('linkableTags', [
-  '$filter', '$parse', 'search.TagService',
-  function ($filter, $parse, TagService) {
-    var tagFilter = $filter('tags');
+angular.module('search').directive('linkableTags', ['$parse',
+  function ($parse) {
     return {
-      controller: function ($scope, $element, $attrs) {
+      controller: ['$scope', '$element', '$attrs', function ($scope, $element, $attrs) {
         this.onClick = function (tag) {
           $parse($attrs.onTagClick)($scope.$parent, { tag:tag });
         };
-      },
+      }]
     };
-  },
+  }
 ]);

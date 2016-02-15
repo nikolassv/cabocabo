@@ -24,5 +24,5 @@
 angular.module('cabocabo', [
   'ngRoute',
   'cards',
-  'angular-nsv-tagsearch',
+  'angular-nsv-tagsearch'
 ]);

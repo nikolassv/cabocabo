@@ -193,5 +193,5 @@
     }
 
     $rootScope.$on('$destroy', saveToLocalStorage);
-  },
+  }
 ]);

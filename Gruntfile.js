@@ -24,11 +24,11 @@
 module.exports = function (grunt) {
   grunt.initConfig({
     clean: {
-      dist: 'dist/'
+      dev: 'dist/'
     },
 
     jshint: {
-      dist: {
+      dev: {
         src: 'app/scripts/**/*.js'
       }
     },
@@ -41,7 +41,7 @@ module.exports = function (grunt) {
     },
 
     concat: {
-      dist: {
+      dev: {
         files: {
           'dist/styles.css': [
             'lib/pure/base.css',
@@ -84,8 +84,25 @@ module.exports = function (grunt) {
       }
     },
 
+    cssmin: {
+      prod: {
+        files: {
+          'dist/styles.css': 'dist/styles.css'
+        }
+      }
+    },
+
+    uglify: {
+      prod: {
+        files: {
+          'dist/lib.js': 'dist/lib.js',
+          'dist/app.js': 'dist/app.js'
+        }
+      }
+    },
+
     copy: {
-      dist: {
+      dev: {
         files: [
           {src: ['app/index.html'], dest: 'dist/index.html'},
           {expand: true, cwd: 'app/scripts', src: ['**/*.html'], dest: 'dist/views/'},
@@ -94,11 +111,23 @@ module.exports = function (grunt) {
       }
     },
 
+    htmlmin: {
+      prod: {
+        options: {
+          removeComments: true,
+          collapseWhitespace: true
+        },
+        files: [
+          {expand: true, cwd: 'dist/views', src: ['**/*.html'], dest: 'dist/views/'}
+        ]
+      }
+    },
+
     svgstore: {
       options: {
         prefix: 'icon-',
       },
-      dist: {
+      dev: {
         files: {
           'dist/img/svg-icons.svg': ['app/img/*.svg']
         }
@@ -122,6 +151,9 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-svgstore');
   grunt.loadNpmTasks('grunt-serve');
   grunt.loadNpmTasks('grunt-jscs');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-htmlmin');
 
   grunt.registerTask('build', [
     'clean',
@@ -135,5 +167,12 @@ module.exports = function (grunt) {
   grunt.registerTask('default', [
     'build',
     'serve'
+  ]);
+
+  grunt.registerTask('prod', [
+    'build',
+    'cssmin:prod',
+    'uglify:prod',
+    'htmlmin:prod'
   ]);
 };
