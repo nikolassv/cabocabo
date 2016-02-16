@@ -24,7 +24,9 @@
 module.exports = function (grunt) {
   grunt.initConfig({
     clean: {
-      dev: 'dist/'
+      dev: {
+        src: ['dist/*', '!dist/.git']
+      }
     },
 
     jshint: {
@@ -141,6 +143,21 @@ module.exports = function (grunt) {
           path: 'dist/'
         }
       }
+    },
+
+    buildcontrol: {
+      options: {
+        dir: 'dist',
+        commit: true,
+        push: true,
+        message: 'Built %sourceName% from commit %sourceCommit% on branch %sourceBranch%'
+      },
+      pages: {
+        options: {
+          remote: 'https://github.com/nikolassv/cabocabo',
+          branch: 'gh-pages'
+        }
+      }
     }
   });
 
@@ -154,6 +171,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-htmlmin');
+  grunt.loadNpmTasks('grunt-build-control');
 
   grunt.registerTask('build', [
     'clean',

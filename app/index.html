@@ -26,26 +26,37 @@
 <!DOCTYPE HTML>
 <html lang="en" ng-app="cabocabo" ng-strict-di>
 <head>
-  <meta charset="UTF-8">
-  <title>Cabocabo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cabocabo</title>
 
-  <script type="text/javascript" src="lib.js"></script>
-  <script type="text/javascript" src="app.js"></script>
-  <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="lib.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="header">Cabocabo <cc-menu></cc-menu></div>
-  
-  <ng-view></ng-view>
-  
-  <!-- load svg icons into body -->
-  <script>
-    jQuery(function ($) {
-       $('<div>').load('img/svg-icons.svg').hide().prependTo('body'); 
-    });
-  </script>
+<header>Cabocabo
+    <cc-menu></cc-menu>
+</header>
 
-  <!-- Entypo pictograms by Daniel Bruce — www.entypo.com -->
+<ng-view></ng-view>
+
+<footer>
+    Cabocabo by Nikolas Schmidt-Voigt - Visit on GitHub:
+    <a
+            href="https://github.com/nikolassv/cabocabo"
+            target="_blank"
+    >https://github.com/nikolassv/cabocabo</a>
+</footer>
+
+<!-- load svg icons into body -->
+<script>
+    jQuery(function ($) {
+        $('<div>').load('img/svg-icons.svg').hide().prependTo('body');
+    });
+</script>
+
+<!-- Entypo pictograms by Daniel Bruce — www.entypo.com -->
 </body>
 </html>
 
