@@ -1,0 +1,1 @@
+<ul ng-show="suggestions.length > 0" class="tagsearch-suggestions"><li ng-mousedown="selectTag(suggestion, $event)" ng-repeat="suggestion in suggestions" ng-class="{'tagsearch-selected-suggestion': ($index === selectedIndex)}" class="tagsearch-suggestion">{{suggestion}}</li></ul>
