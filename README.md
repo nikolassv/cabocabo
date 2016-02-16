@@ -4,6 +4,8 @@ cabocabo is a single page application for taking notes in the browser. Notes are
 
 This application is still under construction and should not be used for important notes.
 
+Try it out at: http://nikolassv.github.io/cabocabo/
+
 ## Install and build
 
 To install cabocabo create a local clone of this repository. Invoke `npm install` and `bower install` to get your development system ready and build the app by invoking the `grunt` command. To use the app open `http://localhost:9000/index.html` in your browser.
